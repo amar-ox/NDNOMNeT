@@ -1,0 +1,10 @@
+<movements (movement)*>
+<movement  id="m1">
+<set speed="1" borderPolicy="reflect"/>
+<repeat>
+<set angle="intuniform(0,3)*90"/>
+<forward d="20"/>
+<wait t="uniform(5,10)">
+</repeat>
+</movement>
+</movements>

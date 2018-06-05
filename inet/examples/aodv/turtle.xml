@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<!DOCTYPE movements SYSTEM "../../etc/TurtleMobility.dtd">
+<movements>
+    <movement id="1">    	
+        <set x="80" y="20" speed="5" borderPolicy="reflect"/>
+        <wait t="5"/>       
+        <moveto x="80" y="40" />
+       
+        <moveto x="60" y="40" />
+                      
+        <moveto x="60" y="60" />
+        
+        <moveto x="40" y="60" />
+        
+        <moveto x="40" y="80" />
+       
+        <moveto x="20" y="80" />           
+    </movement>
+    
+    <movement id="2">    	
+        <set x="20" y="80"  speed="1" borderPolicy="reflect"/>
+        <wait t="5"/>                                                                    
+        <moveto x="40" y="80" />
+         <wait t="3"/>                        
+        <moveto x="40" y="60" />
+         <wait t="3"/> 
+        <moveto x="60" y="60" />
+         <wait t="3"/> 
+        <moveto x="60" y="40" />
+         <wait t="3"/>         
+        <moveto x="80" y="40" />
+         <wait t="3"/> 
+        <moveto x="80" y="20" />    
+    </movement>
+    
+    <movement id="3">    	
+        <set x="145" y="145" speed="3" borderPolicy="reflect"/>              
+        <repeat>
+            <turn angle="intuniform(0,3)*90"/>
+            <forward d="30"/>         
+        </repeat>
+    </movement>
+    
+    <movement id="4">    	
+        <set x="100" y="100" speed="70" borderPolicy="reflect"/>        
+    </movement>
+</movements>
+

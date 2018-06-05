@@ -1,0 +1,1804 @@
+E # 0 t 0 m 1 ce -1 msg -1
+SB v 1281 rid NDNEXAMPLE-0-20180424-14:58:17-7802 b 1000
+KF p -1 c "" s ""
+MC id 1 c omnetpp::cModule t inet.tutorials.wireless.NdnSimple n NdnSimple cm 1
+MS id 1 d bgb=100,100;bgg=100,1,grey95
+MC id 2 c inet::physicallayer::RadioMedium t inet.physicallayer.idealradio.IdealRadioMedium pid 1 n radioMedium
+MS id 2 d p=5,5;i=misc/sun_s
+MC id 3 c omnetpp::cModule t inet.tutorials.wireless.NdnWirelessNode pid 1 n ndnSimpleConsumer cm 1
+MS id 3 d p=20,20;i=device/wifilaptop;bgb=,448
+GC m 3 g 1048576 n radioIn i 0 o 0
+MC id 4 c omnetpp::cModule t inet.tutorials.wireless.NdnWirelessNode pid 1 n ndnSimpleRouter cm 1
+MS id 4 d p=40,40;i=device/wifilaptop;bgb=,448
+GC m 4 g 1048576 n radioIn i 0 o 0
+MC id 5 c omnetpp::cModule t inet.tutorials.wireless.NdnWirelessNode pid 1 n ndnSimpleProducer cm 1
+MS id 5 d p=60,60;i=device/wifilaptop;bgb=,448
+GC m 5 g 1048576 n radioIn i 0 o 0
+MC id 6 c inet::physicallayer::ConstantSpeedPropagation t inet.physicallayer.propagation.ConstantSpeedPropagation pid 2 n propagation cm 1
+MS id 6 d p=100,50;i=block/timer
+MC id 7 c inet::physicallayer::IdealAnalogModel t inet.physicallayer.idealradio.IdealAnalogModel pid 2 n analogModel cm 1
+MS id 7 d p=100,150;i=block/tunnel
+MC id 8 c inet::physicallayer::FreeSpacePathLoss t inet.physicallayer.pathloss.FreeSpacePathLoss pid 2 n pathLoss cm 1
+MS id 8 d p=300,50;i=block/control
+MC id 9 c inet::physicallayer::MediumLimitCache t inet.physicallayer.common.packetlevel.MediumLimitCache pid 2 n mediumLimitCache cm 1
+MS id 9 d p=500,50;i=block/table2
+MC id 10 c inet::physicallayer::VectorCommunicationCache t inet.physicallayer.communicationcache.VectorCommunicationCache pid 2 n communicationCache cm 1
+MS id 10 d p=500,250;i=block/table2
+MC id 11 c inet::StationaryMobility t inet.mobility.static.StationaryMobility pid 3 n mobility
+MS id 11 d p=53,200;i=block/cogwheel
+MC id 12 c omnetpp::cModule t inet.networklayer.generic.GenericNetworkLayer pid 3 n networkLayer cm 1
+MS id 12 d q=queue;p=329,287;i=block/fork
+MC id 13 c inet::GenericRoutingTable t inet.networklayer.generic.GenericRoutingTable pid 3 n routingTable
+MS id 13 d is=s;p=53,250;i=block/table
+MC id 14 c inet::InterfaceTable t inet.networklayer.common.InterfaceTable pid 3 n interfaceTable
+MS id 14 d is=s;p=53,300;i=block/table
+MC id 15 c omnetpp::cModule t inet.linklayer.loopback.LoopbackInterface pid 3 n lo0 cm 1
+GC m 15 g 0 n upperLayerIn o 0
+GC m 15 g 3 n upperLayerOut o 1
+MS id 15 d p=78,406;i=block/ifcard;bgb=214,249;bgl=53
+MC id 16 c omnetpp::cModule t inet.linklayer.ideal.IdealWirelessNic pid 3 n wlan[0] cm 1
+GC m 16 g 0 n upperLayerIn o 0
+GC m 16 g 3 n upperLayerOut o 1
+GC m 16 g 4 n radioIn o 0
+MS id 16 d q=queue;p=216,406,row,60;i=block/ifcard;bgb=214,335;bgl=53
+GC m 12 g 2621440 n ifOut i 0 o 1
+CC sm 12 sg 2621440 dm 15 dg 0
+GC m 12 g 1048576 n ifIn i 0 o 0
+CC sm 15 sg 3 dm 12 dg 1048576
+CC sm 3 sg 1048576 dm 16 dg 4
+CS sm 3 sg 1048576 d m=s
+GC m 12 g 1048577 n ifIn i 1 o 0
+CC sm 16 sg 3 dm 12 dg 1048577
+GC m 12 g 2621441 n ifOut i 1 o 1
+CC sm 12 sg 2621441 dm 16 dg 0
+MC id 18 c omnetpp::cModule t inet.applications.ndn.NdnLayer pid 3 n ndn cm 1
+GC m 18 g 0 n macIn o 0
+GC m 18 g 3 n macOut o 1
+GC m 18 g 4 n applicationIn o 0
+GC m 18 g 7 n applicationOut o 1
+MS id 18 d p=149,287;i=block/fork
+CM id 0 tid 0 eid 0 etid 0 c omnetpp::cMessage n expressInterest pe -1
+MC id 19 c inet::Consumer t inet.applications.ndn.Consumer pid 3 n consumer[0]
+GC m 19 g 0 n consumerIn o 0
+GC m 19 g 3 n consumerOut o 1
+MS id 19 d p=100,80;i=block/source
+GC m 12 g 4718592 n transportOut i 0 o 1
+CC sm 12 sg 4718592 dm 18 dg 0
+GC m 12 g 3145728 n transportIn i 0 o 0
+CC sm 18 sg 3 dm 12 dg 3145728
+CC sm 19 sg 3 dm 18 dg 4
+CC sm 18 sg 7 dm 19 dg 0
+MC id 20 c inet::GenericNetworkProtocol t inet.networklayer.generic.GenericNetworkProtocol pid 12 n gnp
+GC m 20 g 4 n arpIn o 0
+GC m 20 g 7 n arpOut o 1
+MS id 20 d q=queue;p=85,95;i=block/routing
+GC m 20 g 5242880 n queueIn i 0 o 0
+GC m 20 g 5242881 n queueIn i 1 o 0
+GC m 20 g 6815744 n queueOut i 0 o 1
+GC m 20 g 6815745 n queueOut i 1 o 1
+MC id 21 c inet::EchoProtocol t inet.networklayer.common.EchoProtocol pid 12 n echo
+GC m 21 g 0 n localIn o 0
+GC m 21 g 7 n sendOut o 1
+MS id 21 d p=160,63;i=block/control_s
+MC id 22 c inet::GenericARP t inet.networklayer.arp.generic.GenericARP pid 12 n arp
+GC m 22 g 0 n netwIn o 0
+GC m 22 g 3 n netwOut o 1
+MS id 22 d q=pendingQueue;p=202,142;i=block/layer_s
+GC m 20 g 1048576 n transportIn i 0 o 0
+CC sm 12 sg 3145728 dm 20 dg 1048576
+CS sm 12 sg 3145728 d m=n
+GC m 20 g 2621440 n transportOut i 0 o 1
+CC sm 20 sg 2621440 dm 12 dg 4718592
+CS sm 20 sg 2621440 d m=n
+GC m 20 g 2621441 n transportOut i 1 o 1
+CC sm 20 sg 2621441 dm 21 dg 0
+GC m 20 g 1048577 n transportIn i 1 o 0
+CC sm 21 sg 7 dm 20 dg 1048577
+CC sm 20 sg 7 dm 22 dg 0
+CC sm 22 sg 3 dm 20 dg 4
+CC sm 12 sg 1048576 dm 20 dg 5242880
+CS sm 12 sg 1048576 d m=s
+CC sm 12 sg 1048577 dm 20 dg 5242881
+CS sm 12 sg 1048577 d m=s
+CC sm 20 sg 6815744 dm 12 dg 2621440
+CS sm 20 sg 6815744 d m=s
+CC sm 20 sg 6815745 dm 12 dg 2621441
+CS sm 20 sg 6815745 d m=s
+MC id 29 c inet::Loopback t inet.linklayer.loopback.Loopback pid 15 n lo
+GC m 29 g 0 n netwIn o 0
+GC m 29 g 3 n netwOut o 1
+MS id 29 d p=98,207;i=block/rxtx
+CC sm 15 sg 0 dm 29 dg 0
+CS sm 15 sg 0 d m=n
+CC sm 29 sg 3 dm 15 dg 3
+CS sm 29 sg 3 d m=n
+MC id 32 c inet::DropTailQueue t inet.common.queue.DropTailQueue pid 16 n queue
+GC m 32 g 0 n in o 0
+GC m 32 g 3 n out o 1
+MS id 32 d q=l2queue;p=23,125;i=block/queue
+MC id 33 c inet::IdealMac t inet.linklayer.ideal.IdealMac pid 16 n mac
+GC m 33 g 0 n upperLayerIn o 0
+GC m 33 g 3 n upperLayerOut o 1
+GC m 33 g 4 n lowerLayerIn o 0
+GC m 33 g 7 n lowerLayerOut o 1
+MS id 33 d p=98,207;i=block/rxtx
+MC id 34 c inet::physicallayer::Radio t inet.physicallayer.idealradio.IdealRadio pid 16 n radio
+GC m 34 g 0 n upperLayerIn o 0
+GC m 34 g 3 n upperLayerOut o 1
+GC m 34 g 4 n radioIn o 0
+MS id 34 d p=98,278;i=block/wrxtx
+CC sm 16 sg 0 dm 32 dg 0
+CS sm 16 sg 0 d m=n
+CC sm 32 sg 3 dm 33 dg 0
+CC sm 33 sg 7 dm 34 dg 0
+CC sm 33 sg 3 dm 16 dg 3
+CS sm 33 sg 3 d m=n
+CC sm 16 sg 4 dm 34 dg 4
+CS sm 16 sg 4 d m=s
+CC sm 34 sg 3 dm 33 dg 4
+MC id 38 c inet::physicallayer::IsotropicAntenna t inet.physicallayer.antenna.IsotropicAntenna pid 34 n antenna cm 1
+MS id 38 d p=100,50;i=device/antennatower
+MC id 39 c inet::physicallayer::IdealTransmitter t inet.physicallayer.idealradio.IdealTransmitter pid 34 n transmitter cm 1
+MS id 39 d p=100,150;i=block/wtx
+MC id 40 c inet::physicallayer::IdealReceiver t inet.physicallayer.idealradio.IdealReceiver pid 34 n receiver cm 1
+MS id 40 d p=100,250;i=block/wrx
+CM id 1 tid 1 eid 1 etid 1 c omnetpp::cMessage n fi pe -1
+CM id 2 tid 2 eid 2 etid 2 c omnetpp::cMessage n fd pe -1
+MC id 41 c inet::Router t inet.applications.ndn.Router pid 18 n router
+GC m 41 g 0 n macIn o 0
+GC m 41 g 3 n macOut o 1
+GC m 41 g 4 n pitIn o 0
+GC m 41 g 6 n applicationIn o 0
+GC m 41 g 9 n applicationOut o 1
+MS id 41 d q=queue;p=85,95;i=block/source
+MC id 42 c inet::Pit t inet.applications.ndn.Pit pid 18 n pit
+GC m 42 g 1 n pitOut o 1
+MS id 42 d p=160,63;i=block/source
+CC sm 18 sg 0 dm 41 dg 0
+CC sm 41 sg 3 dm 18 dg 3
+CC sm 42 sg 1 dm 41 dg 4
+CC sm 18 sg 4 dm 41 dg 6
+CC sm 41 sg 9 dm 18 dg 7
+MC id 43 c inet::StationaryMobility t inet.mobility.static.StationaryMobility pid 4 n mobility
+MS id 43 d p=53,200;i=block/cogwheel
+MC id 44 c omnetpp::cModule t inet.networklayer.generic.GenericNetworkLayer pid 4 n networkLayer cm 1
+MS id 44 d q=queue;p=329,287;i=block/fork
+MC id 45 c inet::GenericRoutingTable t inet.networklayer.generic.GenericRoutingTable pid 4 n routingTable
+MS id 45 d is=s;p=53,250;i=block/table
+MC id 46 c inet::InterfaceTable t inet.networklayer.common.InterfaceTable pid 4 n interfaceTable
+MS id 46 d is=s;p=53,300;i=block/table
+MC id 47 c omnetpp::cModule t inet.linklayer.loopback.LoopbackInterface pid 4 n lo0 cm 1
+GC m 47 g 0 n upperLayerIn o 0
+GC m 47 g 3 n upperLayerOut o 1
+MS id 47 d p=78,406;i=block/ifcard;bgb=214,249;bgl=53
+MC id 48 c omnetpp::cModule t inet.linklayer.ideal.IdealWirelessNic pid 4 n wlan[0] cm 1
+GC m 48 g 0 n upperLayerIn o 0
+GC m 48 g 3 n upperLayerOut o 1
+GC m 48 g 4 n radioIn o 0
+MS id 48 d q=queue;p=216,406,row,60;i=block/ifcard;bgb=214,335;bgl=53
+GC m 44 g 2621440 n ifOut i 0 o 1
+CC sm 44 sg 2621440 dm 47 dg 0
+GC m 44 g 1048576 n ifIn i 0 o 0
+CC sm 47 sg 3 dm 44 dg 1048576
+CC sm 4 sg 1048576 dm 48 dg 4
+CS sm 4 sg 1048576 d m=s
+GC m 44 g 1048577 n ifIn i 1 o 0
+CC sm 48 sg 3 dm 44 dg 1048577
+GC m 44 g 2621441 n ifOut i 1 o 1
+CC sm 44 sg 2621441 dm 48 dg 0
+MC id 50 c omnetpp::cModule t inet.applications.ndn.NdnLayer pid 4 n ndn cm 1
+GC m 50 g 0 n macIn o 0
+GC m 50 g 3 n macOut o 1
+GC m 50 g 4 n applicationIn o 0
+GC m 50 g 7 n applicationOut o 1
+MS id 50 d p=149,287;i=block/fork
+GC m 44 g 4718592 n transportOut i 0 o 1
+CC sm 44 sg 4718592 dm 50 dg 0
+GC m 44 g 3145728 n transportIn i 0 o 0
+CC sm 50 sg 3 dm 44 dg 3145728
+MC id 51 c inet::GenericNetworkProtocol t inet.networklayer.generic.GenericNetworkProtocol pid 44 n gnp
+GC m 51 g 4 n arpIn o 0
+GC m 51 g 7 n arpOut o 1
+MS id 51 d q=queue;p=85,95;i=block/routing
+GC m 51 g 5242880 n queueIn i 0 o 0
+GC m 51 g 5242881 n queueIn i 1 o 0
+GC m 51 g 6815744 n queueOut i 0 o 1
+GC m 51 g 6815745 n queueOut i 1 o 1
+MC id 52 c inet::EchoProtocol t inet.networklayer.common.EchoProtocol pid 44 n echo
+GC m 52 g 0 n localIn o 0
+GC m 52 g 7 n sendOut o 1
+MS id 52 d p=160,63;i=block/control_s
+MC id 53 c inet::GenericARP t inet.networklayer.arp.generic.GenericARP pid 44 n arp
+GC m 53 g 0 n netwIn o 0
+GC m 53 g 3 n netwOut o 1
+MS id 53 d q=pendingQueue;p=202,142;i=block/layer_s
+GC m 51 g 1048576 n transportIn i 0 o 0
+CC sm 44 sg 3145728 dm 51 dg 1048576
+CS sm 44 sg 3145728 d m=n
+GC m 51 g 2621440 n transportOut i 0 o 1
+CC sm 51 sg 2621440 dm 44 dg 4718592
+CS sm 51 sg 2621440 d m=n
+GC m 51 g 2621441 n transportOut i 1 o 1
+CC sm 51 sg 2621441 dm 52 dg 0
+GC m 51 g 1048577 n transportIn i 1 o 0
+CC sm 52 sg 7 dm 51 dg 1048577
+CC sm 51 sg 7 dm 53 dg 0
+CC sm 53 sg 3 dm 51 dg 4
+CC sm 44 sg 1048576 dm 51 dg 5242880
+CS sm 44 sg 1048576 d m=s
+CC sm 44 sg 1048577 dm 51 dg 5242881
+CS sm 44 sg 1048577 d m=s
+CC sm 51 sg 6815744 dm 44 dg 2621440
+CS sm 51 sg 6815744 d m=s
+CC sm 51 sg 6815745 dm 44 dg 2621441
+CS sm 51 sg 6815745 d m=s
+MC id 60 c inet::Loopback t inet.linklayer.loopback.Loopback pid 47 n lo
+GC m 60 g 0 n netwIn o 0
+GC m 60 g 3 n netwOut o 1
+MS id 60 d p=98,207;i=block/rxtx
+CC sm 47 sg 0 dm 60 dg 0
+CS sm 47 sg 0 d m=n
+CC sm 60 sg 3 dm 47 dg 3
+CS sm 60 sg 3 d m=n
+MC id 63 c inet::DropTailQueue t inet.common.queue.DropTailQueue pid 48 n queue
+GC m 63 g 0 n in o 0
+GC m 63 g 3 n out o 1
+MS id 63 d q=l2queue;p=23,125;i=block/queue
+MC id 64 c inet::IdealMac t inet.linklayer.ideal.IdealMac pid 48 n mac
+GC m 64 g 0 n upperLayerIn o 0
+GC m 64 g 3 n upperLayerOut o 1
+GC m 64 g 4 n lowerLayerIn o 0
+GC m 64 g 7 n lowerLayerOut o 1
+MS id 64 d p=98,207;i=block/rxtx
+MC id 65 c inet::physicallayer::Radio t inet.physicallayer.idealradio.IdealRadio pid 48 n radio
+GC m 65 g 0 n upperLayerIn o 0
+GC m 65 g 3 n upperLayerOut o 1
+GC m 65 g 4 n radioIn o 0
+MS id 65 d p=98,278;i=block/wrxtx
+CC sm 48 sg 0 dm 63 dg 0
+CS sm 48 sg 0 d m=n
+CC sm 63 sg 3 dm 64 dg 0
+CC sm 64 sg 7 dm 65 dg 0
+CC sm 64 sg 3 dm 48 dg 3
+CS sm 64 sg 3 d m=n
+CC sm 48 sg 4 dm 65 dg 4
+CS sm 48 sg 4 d m=s
+CC sm 65 sg 3 dm 64 dg 4
+MC id 69 c inet::physicallayer::IsotropicAntenna t inet.physicallayer.antenna.IsotropicAntenna pid 65 n antenna cm 1
+MS id 69 d p=100,50;i=device/antennatower
+MC id 70 c inet::physicallayer::IdealTransmitter t inet.physicallayer.idealradio.IdealTransmitter pid 65 n transmitter cm 1
+MS id 70 d p=100,150;i=block/wtx
+MC id 71 c inet::physicallayer::IdealReceiver t inet.physicallayer.idealradio.IdealReceiver pid 65 n receiver cm 1
+MS id 71 d p=100,250;i=block/wrx
+CM id 3 tid 3 eid 3 etid 3 c omnetpp::cMessage n fi pe -1
+CM id 4 tid 4 eid 4 etid 4 c omnetpp::cMessage n fd pe -1
+MC id 72 c inet::Router t inet.applications.ndn.Router pid 50 n router
+GC m 72 g 0 n macIn o 0
+GC m 72 g 3 n macOut o 1
+GC m 72 g 4 n pitIn o 0
+GC m 72 g 6 n applicationIn o 0
+GC m 72 g 9 n applicationOut o 1
+MS id 72 d q=queue;p=85,95;i=block/source
+MC id 73 c inet::Pit t inet.applications.ndn.Pit pid 50 n pit
+GC m 73 g 1 n pitOut o 1
+MS id 73 d p=160,63;i=block/source
+CC sm 50 sg 0 dm 72 dg 0
+CC sm 72 sg 3 dm 50 dg 3
+CC sm 73 sg 1 dm 72 dg 4
+CC sm 50 sg 4 dm 72 dg 6
+CC sm 72 sg 9 dm 50 dg 7
+MC id 74 c inet::StationaryMobility t inet.mobility.static.StationaryMobility pid 5 n mobility
+MS id 74 d p=53,200;i=block/cogwheel
+MC id 75 c omnetpp::cModule t inet.networklayer.generic.GenericNetworkLayer pid 5 n networkLayer cm 1
+MS id 75 d q=queue;p=329,287;i=block/fork
+MC id 76 c inet::GenericRoutingTable t inet.networklayer.generic.GenericRoutingTable pid 5 n routingTable
+MS id 76 d is=s;p=53,250;i=block/table
+MC id 77 c inet::InterfaceTable t inet.networklayer.common.InterfaceTable pid 5 n interfaceTable
+MS id 77 d is=s;p=53,300;i=block/table
+MC id 78 c omnetpp::cModule t inet.linklayer.loopback.LoopbackInterface pid 5 n lo0 cm 1
+GC m 78 g 0 n upperLayerIn o 0
+GC m 78 g 3 n upperLayerOut o 1
+MS id 78 d p=78,406;i=block/ifcard;bgb=214,249;bgl=53
+MC id 79 c omnetpp::cModule t inet.linklayer.ideal.IdealWirelessNic pid 5 n wlan[0] cm 1
+GC m 79 g 0 n upperLayerIn o 0
+GC m 79 g 3 n upperLayerOut o 1
+GC m 79 g 4 n radioIn o 0
+MS id 79 d q=queue;p=216,406,row,60;i=block/ifcard;bgb=214,335;bgl=53
+GC m 75 g 2621440 n ifOut i 0 o 1
+CC sm 75 sg 2621440 dm 78 dg 0
+GC m 75 g 1048576 n ifIn i 0 o 0
+CC sm 78 sg 3 dm 75 dg 1048576
+CC sm 5 sg 1048576 dm 79 dg 4
+CS sm 5 sg 1048576 d m=s
+GC m 75 g 1048577 n ifIn i 1 o 0
+CC sm 79 sg 3 dm 75 dg 1048577
+GC m 75 g 2621441 n ifOut i 1 o 1
+CC sm 75 sg 2621441 dm 79 dg 0
+MC id 81 c omnetpp::cModule t inet.applications.ndn.NdnLayer pid 5 n ndn cm 1
+GC m 81 g 0 n macIn o 0
+GC m 81 g 3 n macOut o 1
+GC m 81 g 4 n applicationIn o 0
+GC m 81 g 7 n applicationOut o 1
+MS id 81 d p=149,287;i=block/fork
+GC m 75 g 4718592 n transportOut i 0 o 1
+CC sm 75 sg 4718592 dm 81 dg 0
+GC m 75 g 3145728 n transportIn i 0 o 0
+CC sm 81 sg 3 dm 75 dg 3145728
+MC id 82 c inet::GenericNetworkProtocol t inet.networklayer.generic.GenericNetworkProtocol pid 75 n gnp
+GC m 82 g 4 n arpIn o 0
+GC m 82 g 7 n arpOut o 1
+MS id 82 d q=queue;p=85,95;i=block/routing
+GC m 82 g 5242880 n queueIn i 0 o 0
+GC m 82 g 5242881 n queueIn i 1 o 0
+GC m 82 g 6815744 n queueOut i 0 o 1
+GC m 82 g 6815745 n queueOut i 1 o 1
+MC id 83 c inet::EchoProtocol t inet.networklayer.common.EchoProtocol pid 75 n echo
+GC m 83 g 0 n localIn o 0
+GC m 83 g 7 n sendOut o 1
+MS id 83 d p=160,63;i=block/control_s
+MC id 84 c inet::GenericARP t inet.networklayer.arp.generic.GenericARP pid 75 n arp
+GC m 84 g 0 n netwIn o 0
+GC m 84 g 3 n netwOut o 1
+MS id 84 d q=pendingQueue;p=202,142;i=block/layer_s
+GC m 82 g 1048576 n transportIn i 0 o 0
+CC sm 75 sg 3145728 dm 82 dg 1048576
+CS sm 75 sg 3145728 d m=n
+GC m 82 g 2621440 n transportOut i 0 o 1
+CC sm 82 sg 2621440 dm 75 dg 4718592
+CS sm 82 sg 2621440 d m=n
+GC m 82 g 2621441 n transportOut i 1 o 1
+CC sm 82 sg 2621441 dm 83 dg 0
+GC m 82 g 1048577 n transportIn i 1 o 0
+CC sm 83 sg 7 dm 82 dg 1048577
+CC sm 82 sg 7 dm 84 dg 0
+CC sm 84 sg 3 dm 82 dg 4
+CC sm 75 sg 1048576 dm 82 dg 5242880
+CS sm 75 sg 1048576 d m=s
+CC sm 75 sg 1048577 dm 82 dg 5242881
+CS sm 75 sg 1048577 d m=s
+CC sm 82 sg 6815744 dm 75 dg 2621440
+CS sm 82 sg 6815744 d m=s
+CC sm 82 sg 6815745 dm 75 dg 2621441
+CS sm 82 sg 6815745 d m=s
+MC id 91 c inet::Loopback t inet.linklayer.loopback.Loopback pid 78 n lo
+GC m 91 g 0 n netwIn o 0
+GC m 91 g 3 n netwOut o 1
+MS id 91 d p=98,207;i=block/rxtx
+CC sm 78 sg 0 dm 91 dg 0
+CS sm 78 sg 0 d m=n
+CC sm 91 sg 3 dm 78 dg 3
+CS sm 91 sg 3 d m=n
+MC id 94 c inet::DropTailQueue t inet.common.queue.DropTailQueue pid 79 n queue
+GC m 94 g 0 n in o 0
+GC m 94 g 3 n out o 1
+MS id 94 d q=l2queue;p=23,125;i=block/queue
+MC id 95 c inet::IdealMac t inet.linklayer.ideal.IdealMac pid 79 n mac
+GC m 95 g 0 n upperLayerIn o 0
+GC m 95 g 3 n upperLayerOut o 1
+GC m 95 g 4 n lowerLayerIn o 0
+GC m 95 g 7 n lowerLayerOut o 1
+MS id 95 d p=98,207;i=block/rxtx
+MC id 96 c inet::physicallayer::Radio t inet.physicallayer.idealradio.IdealRadio pid 79 n radio
+GC m 96 g 0 n upperLayerIn o 0
+GC m 96 g 3 n upperLayerOut o 1
+GC m 96 g 4 n radioIn o 0
+MS id 96 d p=98,278;i=block/wrxtx
+CC sm 79 sg 0 dm 94 dg 0
+CS sm 79 sg 0 d m=n
+CC sm 94 sg 3 dm 95 dg 0
+CC sm 95 sg 7 dm 96 dg 0
+CC sm 95 sg 3 dm 79 dg 3
+CS sm 95 sg 3 d m=n
+CC sm 79 sg 4 dm 96 dg 4
+CS sm 79 sg 4 d m=s
+CC sm 96 sg 3 dm 95 dg 4
+MC id 100 c inet::physicallayer::IsotropicAntenna t inet.physicallayer.antenna.IsotropicAntenna pid 96 n antenna cm 1
+MS id 100 d p=100,50;i=device/antennatower
+MC id 101 c inet::physicallayer::IdealTransmitter t inet.physicallayer.idealradio.IdealTransmitter pid 96 n transmitter cm 1
+MS id 101 d p=100,150;i=block/wtx
+MC id 102 c inet::physicallayer::IdealReceiver t inet.physicallayer.idealradio.IdealReceiver pid 96 n receiver cm 1
+MS id 102 d p=100,250;i=block/wrx
+CM id 5 tid 5 eid 5 etid 5 c omnetpp::cMessage n fi pe -1
+CM id 6 tid 6 eid 6 etid 6 c omnetpp::cMessage n fd pe -1
+MC id 103 c inet::Router t inet.applications.ndn.Router pid 81 n router
+GC m 103 g 0 n macIn o 0
+GC m 103 g 3 n macOut o 1
+GC m 103 g 4 n pitIn o 0
+GC m 103 g 6 n applicationIn o 0
+GC m 103 g 9 n applicationOut o 1
+MS id 103 d q=queue;p=85,95;i=block/source
+MC id 104 c inet::Pit t inet.applications.ndn.Pit pid 81 n pit
+GC m 104 g 1 n pitOut o 1
+MS id 104 d p=160,63;i=block/source
+CC sm 81 sg 0 dm 103 dg 0
+CC sm 103 sg 3 dm 81 dg 3
+CC sm 104 sg 1 dm 103 dg 4
+CC sm 81 sg 4 dm 103 dg 6
+CC sm 103 sg 9 dm 81 dg 7
+MB sm 1 tm 2 m initialize(0)
+CM id 7 tid 7 eid 7 etid 7 c omnetpp::cMessage n removeNonInterferingTransmissions pe -1
+ME
+MB sm 1 tm 6 m initialize(0)
+ME
+MB sm 1 tm 7 m initialize(0)
+ME
+MB sm 1 tm 8 m initialize(0)
+ME
+MB sm 1 tm 9 m initialize(0)
+ME
+MB sm 1 tm 10 m initialize(0)
+ME
+MB sm 1 tm 3 m initialize(0)
+ME
+MB sm 1 tm 11 m initialize(0)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 0
+ME
+MB sm 1 tm 12 m initialize(0)
+ME
+MB sm 1 tm 20 m initialize(0)
+CM id 8 tid 8 eid 8 etid 8 c omnetpp::cMessage n end-service pe -1
+ME
+MB sm 1 tm 21 m initialize(0)
+ME
+MB sm 1 tm 22 m initialize(0)
+ME
+MB sm 1 tm 13 m initialize(0)
+ME
+MB sm 1 tm 14 m initialize(0)
+ME
+MB sm 1 tm 15 m initialize(0)
+ME
+MB sm 1 tm 29 m initialize(0)
+ME
+MB sm 1 tm 16 m initialize(0)
+ME
+MB sm 1 tm 32 m initialize(0)
+ME
+MB sm 1 tm 33 m initialize(0)
+ME
+MB sm 1 tm 34 m initialize(0)
+CM id 9 tid 9 eid 9 etid 9 c omnetpp::cMessage n transmissionTimer pe -1
+ME
+MB sm 1 tm 38 m initialize(0)
+ME
+MB sm 1 tm 39 m initialize(0)
+ME
+MB sm 1 tm 40 m initialize(0)
+ME
+MB sm 1 tm 18 m initialize(0)
+ME
+MB sm 1 tm 41 m initialize(0)
+ME
+MB sm 1 tm 42 m initialize(0)
+ME
+MB sm 1 tm 19 m initialize(0)
+ME
+MB sm 1 tm 4 m initialize(0)
+ME
+MB sm 1 tm 43 m initialize(0)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 0
+ME
+MB sm 1 tm 44 m initialize(0)
+ME
+MB sm 1 tm 51 m initialize(0)
+CM id 10 tid 10 eid 10 etid 10 c omnetpp::cMessage n end-service pe -1
+ME
+MB sm 1 tm 52 m initialize(0)
+ME
+MB sm 1 tm 53 m initialize(0)
+ME
+MB sm 1 tm 45 m initialize(0)
+ME
+MB sm 1 tm 46 m initialize(0)
+ME
+MB sm 1 tm 47 m initialize(0)
+ME
+MB sm 1 tm 60 m initialize(0)
+ME
+MB sm 1 tm 48 m initialize(0)
+ME
+MB sm 1 tm 63 m initialize(0)
+ME
+MB sm 1 tm 64 m initialize(0)
+ME
+MB sm 1 tm 65 m initialize(0)
+CM id 11 tid 11 eid 11 etid 11 c omnetpp::cMessage n transmissionTimer pe -1
+ME
+MB sm 1 tm 69 m initialize(0)
+ME
+MB sm 1 tm 70 m initialize(0)
+ME
+MB sm 1 tm 71 m initialize(0)
+ME
+MB sm 1 tm 50 m initialize(0)
+ME
+MB sm 1 tm 72 m initialize(0)
+ME
+MB sm 1 tm 73 m initialize(0)
+ME
+MB sm 1 tm 5 m initialize(0)
+ME
+MB sm 1 tm 74 m initialize(0)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 0
+ME
+MB sm 1 tm 75 m initialize(0)
+ME
+MB sm 1 tm 82 m initialize(0)
+CM id 12 tid 12 eid 12 etid 12 c omnetpp::cMessage n end-service pe -1
+ME
+MB sm 1 tm 83 m initialize(0)
+ME
+MB sm 1 tm 84 m initialize(0)
+ME
+MB sm 1 tm 76 m initialize(0)
+ME
+MB sm 1 tm 77 m initialize(0)
+ME
+MB sm 1 tm 78 m initialize(0)
+ME
+MB sm 1 tm 91 m initialize(0)
+ME
+MB sm 1 tm 79 m initialize(0)
+ME
+MB sm 1 tm 94 m initialize(0)
+ME
+MB sm 1 tm 95 m initialize(0)
+ME
+MB sm 1 tm 96 m initialize(0)
+CM id 13 tid 13 eid 13 etid 13 c omnetpp::cMessage n transmissionTimer pe -1
+ME
+MB sm 1 tm 100 m initialize(0)
+ME
+MB sm 1 tm 101 m initialize(0)
+ME
+MB sm 1 tm 102 m initialize(0)
+ME
+MB sm 1 tm 81 m initialize(0)
+ME
+MB sm 1 tm 103 m initialize(0)
+ME
+MB sm 1 tm 104 m initialize(0)
+ME
+MB sm 1 tm 2 m initialize(1)
+ME
+MB sm 1 tm 9 m initialize(1)
+ME
+MB sm 1 tm 11 m initialize(1)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 1
+ME
+MB sm 1 tm 21 m initialize(1)
+ME
+MB sm 1 tm 22 m initialize(1)
+ME
+MB sm 1 tm 13 m initialize(1)
+ME
+MB sm 1 tm 14 m initialize(1)
+ME
+MB sm 1 tm 29 m initialize(1)
+ME
+MB sm 1 tm 33 m initialize(1)
+ME
+MB sm 1 tm 34 m initialize(1)
+ME
+MB sm 1 tm 39 m initialize(1)
+ME
+MB sm 1 tm 40 m initialize(1)
+ME
+MB sm 1 tm 41 m initialize(1)
+ME
+MB sm 1 tm 19 m initialize(1)
+ME
+MB sm 1 tm 43 m initialize(1)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 1
+ME
+MB sm 1 tm 52 m initialize(1)
+ME
+MB sm 1 tm 53 m initialize(1)
+ME
+MB sm 1 tm 45 m initialize(1)
+ME
+MB sm 1 tm 46 m initialize(1)
+ME
+MB sm 1 tm 60 m initialize(1)
+ME
+MB sm 1 tm 64 m initialize(1)
+ME
+MB sm 1 tm 65 m initialize(1)
+ME
+MB sm 1 tm 70 m initialize(1)
+ME
+MB sm 1 tm 71 m initialize(1)
+ME
+MB sm 1 tm 72 m initialize(1)
+ME
+MB sm 1 tm 74 m initialize(1)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 1
+ME
+MB sm 1 tm 83 m initialize(1)
+ME
+MB sm 1 tm 84 m initialize(1)
+ME
+MB sm 1 tm 76 m initialize(1)
+ME
+MB sm 1 tm 77 m initialize(1)
+ME
+MB sm 1 tm 91 m initialize(1)
+ME
+MB sm 1 tm 95 m initialize(1)
+ME
+MB sm 1 tm 96 m initialize(1)
+ME
+MB sm 1 tm 101 m initialize(1)
+ME
+MB sm 1 tm 102 m initialize(1)
+ME
+MB sm 1 tm 103 m initialize(1)
+ME
+MB sm 1 tm 2 m initialize(2)
+ME
+MB sm 1 tm 9 m initialize(2)
+ME
+MB sm 1 tm 11 m initialize(2)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 2
+- DEBUG (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: current position = (20, 20, 0)
+MS id 3 d p=20.000000,20;i=device/wifilaptop;bgb=,448
+MS id 3 d p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+ME
+MB sm 1 tm 21 m initialize(2)
+ME
+MB sm 1 tm 22 m initialize(2)
+ME
+MB sm 1 tm 13 m initialize(2)
+ME
+MB sm 1 tm 14 m initialize(2)
+ME
+MB sm 1 tm 29 m initialize(2)
+ME
+MB sm 1 tm 33 m initialize(2)
+ME
+MB sm 1 tm 34 m initialize(2)
+ME
+MB sm 1 tm 39 m initialize(2)
+ME
+MB sm 1 tm 40 m initialize(2)
+ME
+MB sm 1 tm 41 m initialize(2)
+ME
+MB sm 1 tm 19 m initialize(2)
+ME
+MB sm 1 tm 43 m initialize(2)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 2
+- DEBUG (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: current position = (40, 40, 0)
+MS id 4 d p=40.000000,40;i=device/wifilaptop;bgb=,448
+MS id 4 d p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+ME
+MB sm 1 tm 52 m initialize(2)
+ME
+MB sm 1 tm 53 m initialize(2)
+ME
+MB sm 1 tm 45 m initialize(2)
+ME
+MB sm 1 tm 46 m initialize(2)
+ME
+MB sm 1 tm 60 m initialize(2)
+ME
+MB sm 1 tm 64 m initialize(2)
+ME
+MB sm 1 tm 65 m initialize(2)
+ME
+MB sm 1 tm 70 m initialize(2)
+ME
+MB sm 1 tm 71 m initialize(2)
+ME
+MB sm 1 tm 72 m initialize(2)
+ME
+MB sm 1 tm 74 m initialize(2)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 2
+- DEBUG (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: current position = (60, 60, 0)
+MS id 5 d p=60.000000,60;i=device/wifilaptop;bgb=,448
+MS id 5 d p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+ME
+MB sm 1 tm 83 m initialize(2)
+ME
+MB sm 1 tm 84 m initialize(2)
+ME
+MB sm 1 tm 76 m initialize(2)
+ME
+MB sm 1 tm 77 m initialize(2)
+ME
+MB sm 1 tm 91 m initialize(2)
+ME
+MB sm 1 tm 95 m initialize(2)
+ME
+MB sm 1 tm 96 m initialize(2)
+ME
+MB sm 1 tm 101 m initialize(2)
+ME
+MB sm 1 tm 102 m initialize(2)
+ME
+MB sm 1 tm 103 m initialize(2)
+ME
+MB sm 1 tm 2 m initialize(3)
+ME
+MB sm 1 tm 9 m initialize(3)
+ME
+MB sm 1 tm 11 m initialize(3)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 3
+ME
+MB sm 1 tm 21 m initialize(3)
+ME
+MB sm 1 tm 22 m initialize(3)
+ME
+MB sm 1 tm 13 m initialize(3)
+ME
+MB sm 1 tm 14 m initialize(3)
+ME
+MB sm 1 tm 29 m initialize(3)
+ME
+MB sm 1 tm 33 m initialize(3)
+ME
+MB sm 1 tm 34 m initialize(3)
+- INFO (IdealRadio)NdnSimple.ndnSimpleConsumer.wlan[0].radio: Radio mode changed from OFF to OFF
+CM id 14 tid 14 eid 14 etid 14 c omnetpp::cMessage n switchTimer pe -1
+ME
+MB sm 1 tm 39 m initialize(3)
+ME
+MB sm 1 tm 40 m initialize(3)
+ME
+MB sm 1 tm 41 m initialize(3)
+ME
+MB sm 1 tm 19 m initialize(3)
+ME
+MB sm 1 tm 43 m initialize(3)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 3
+ME
+MB sm 1 tm 52 m initialize(3)
+ME
+MB sm 1 tm 53 m initialize(3)
+ME
+MB sm 1 tm 45 m initialize(3)
+ME
+MB sm 1 tm 46 m initialize(3)
+ME
+MB sm 1 tm 60 m initialize(3)
+ME
+MB sm 1 tm 64 m initialize(3)
+ME
+MB sm 1 tm 65 m initialize(3)
+- INFO (IdealRadio)NdnSimple.ndnSimpleRouter.wlan[0].radio: Radio mode changed from OFF to OFF
+CM id 15 tid 15 eid 15 etid 15 c omnetpp::cMessage n switchTimer pe -1
+ME
+MB sm 1 tm 70 m initialize(3)
+ME
+MB sm 1 tm 71 m initialize(3)
+ME
+MB sm 1 tm 72 m initialize(3)
+ME
+MB sm 1 tm 74 m initialize(3)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 3
+ME
+MB sm 1 tm 83 m initialize(3)
+ME
+MB sm 1 tm 84 m initialize(3)
+ME
+MB sm 1 tm 76 m initialize(3)
+ME
+MB sm 1 tm 77 m initialize(3)
+ME
+MB sm 1 tm 91 m initialize(3)
+ME
+MB sm 1 tm 95 m initialize(3)
+ME
+MB sm 1 tm 96 m initialize(3)
+- INFO (IdealRadio)NdnSimple.ndnSimpleProducer.wlan[0].radio: Radio mode changed from OFF to OFF
+CM id 16 tid 16 eid 16 etid 16 c omnetpp::cMessage n switchTimer pe -1
+ME
+MB sm 1 tm 101 m initialize(3)
+ME
+MB sm 1 tm 102 m initialize(3)
+ME
+MB sm 1 tm 103 m initialize(3)
+ME
+MB sm 1 tm 2 m initialize(4)
+ME
+MB sm 1 tm 9 m initialize(4)
+ME
+MB sm 1 tm 11 m initialize(4)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 4
+ME
+MB sm 1 tm 21 m initialize(4)
+ME
+MB sm 1 tm 22 m initialize(4)
+ME
+MB sm 1 tm 13 m initialize(4)
+ME
+MB sm 1 tm 14 m initialize(4)
+ME
+MB sm 1 tm 29 m initialize(4)
+MB sm 29 tm 14 m ""
+ME
+MB sm 29 tm 14 m ""
+ME
+ME
+MB sm 1 tm 33 m initialize(4)
+MB sm 33 tm 34 m ""
+- INFO (IdealRadio)NdnSimple.ndnSimpleConsumer.wlan[0].radio: Radio mode changed from OFF to TRANSCEIVER
+- DEBUG (IdealRadio)NdnSimple.ndnSimpleConsumer.wlan[0].radio: Listening with IdealListening, receiverId = 0, startTime = 0, endTime = 0.000000000001, startPosition = (20, 20, 0), endPosition = (20, 20, 0) on medium by (inet::physicallayer::Radio)radio, antenna = { IsotropicAntenna }, transmitter = { IdealTransmitter, communicationRange = 35 m }, receiver = { IdealReceiver, considering interference } results in ListeningDecision, impossible, listening = { IdealListening }
+- INFO (IdealRadio)NdnSimple.ndnSimpleConsumer.wlan[0].radio: Changing radio reception state from UNDEFINED to IDLE.
+- INFO (IdealRadio)NdnSimple.ndnSimpleConsumer.wlan[0].radio: Changing radio transmission state from UNDEFINED to IDLE.
+MB sm 34 tm 33 m ""
+ME
+ME
+CM id 17 tid 17 eid 17 etid 17 c omnetpp::cMessage n link-break pe -1
+MB sm 33 tm 32 m requestPacket()
+ME
+MB sm 33 tm 14 m ""
+ME
+MB sm 33 tm 14 m ""
+ME
+MB sm 33 tm 14 m ""
+ME
+ME
+MB sm 1 tm 34 m initialize(4)
+ME
+MB sm 1 tm 39 m initialize(4)
+ME
+MB sm 1 tm 40 m initialize(4)
+ME
+MB sm 1 tm 41 m initialize(4)
+ME
+MB sm 1 tm 19 m initialize(4)
+ME
+MB sm 1 tm 43 m initialize(4)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 4
+ME
+MB sm 1 tm 52 m initialize(4)
+ME
+MB sm 1 tm 53 m initialize(4)
+ME
+MB sm 1 tm 45 m initialize(4)
+ME
+MB sm 1 tm 46 m initialize(4)
+ME
+MB sm 1 tm 60 m initialize(4)
+MB sm 60 tm 46 m ""
+ME
+MB sm 60 tm 46 m ""
+ME
+ME
+MB sm 1 tm 64 m initialize(4)
+MB sm 64 tm 65 m ""
+- INFO (IdealRadio)NdnSimple.ndnSimpleRouter.wlan[0].radio: Radio mode changed from OFF to TRANSCEIVER
+- DEBUG (IdealRadio)NdnSimple.ndnSimpleRouter.wlan[0].radio: Listening with IdealListening, receiverId = 1, startTime = 0, endTime = 0.000000000001, startPosition = (40, 40, 0), endPosition = (40, 40, 0) on medium by (inet::physicallayer::Radio)radio, antenna = { IsotropicAntenna }, transmitter = { IdealTransmitter, communicationRange = 35 m }, receiver = { IdealReceiver, considering interference } results in ListeningDecision, impossible, listening = { IdealListening }
+- INFO (IdealRadio)NdnSimple.ndnSimpleRouter.wlan[0].radio: Changing radio reception state from UNDEFINED to IDLE.
+- INFO (IdealRadio)NdnSimple.ndnSimpleRouter.wlan[0].radio: Changing radio transmission state from UNDEFINED to IDLE.
+MB sm 65 tm 64 m ""
+ME
+ME
+CM id 18 tid 18 eid 18 etid 18 c omnetpp::cMessage n link-break pe -1
+MB sm 64 tm 63 m requestPacket()
+ME
+MB sm 64 tm 46 m ""
+ME
+MB sm 64 tm 46 m ""
+ME
+MB sm 64 tm 46 m ""
+ME
+ME
+MB sm 1 tm 65 m initialize(4)
+ME
+MB sm 1 tm 70 m initialize(4)
+ME
+MB sm 1 tm 71 m initialize(4)
+ME
+MB sm 1 tm 72 m initialize(4)
+ME
+MB sm 1 tm 74 m initialize(4)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 4
+ME
+MB sm 1 tm 83 m initialize(4)
+ME
+MB sm 1 tm 84 m initialize(4)
+ME
+MB sm 1 tm 76 m initialize(4)
+ME
+MB sm 1 tm 77 m initialize(4)
+ME
+MB sm 1 tm 91 m initialize(4)
+MB sm 91 tm 77 m ""
+ME
+MB sm 91 tm 77 m ""
+ME
+ME
+MB sm 1 tm 95 m initialize(4)
+MB sm 95 tm 96 m ""
+- INFO (IdealRadio)NdnSimple.ndnSimpleProducer.wlan[0].radio: Radio mode changed from OFF to TRANSCEIVER
+- DEBUG (IdealRadio)NdnSimple.ndnSimpleProducer.wlan[0].radio: Listening with IdealListening, receiverId = 2, startTime = 0, endTime = 0.000000000001, startPosition = (60, 60, 0), endPosition = (60, 60, 0) on medium by (inet::physicallayer::Radio)radio, antenna = { IsotropicAntenna }, transmitter = { IdealTransmitter, communicationRange = 35 m }, receiver = { IdealReceiver, considering interference } results in ListeningDecision, impossible, listening = { IdealListening }
+- INFO (IdealRadio)NdnSimple.ndnSimpleProducer.wlan[0].radio: Changing radio reception state from UNDEFINED to IDLE.
+- INFO (IdealRadio)NdnSimple.ndnSimpleProducer.wlan[0].radio: Changing radio transmission state from UNDEFINED to IDLE.
+MB sm 96 tm 95 m ""
+ME
+ME
+CM id 19 tid 19 eid 19 etid 19 c omnetpp::cMessage n link-break pe -1
+MB sm 95 tm 94 m requestPacket()
+ME
+MB sm 95 tm 77 m ""
+ME
+MB sm 95 tm 77 m ""
+ME
+MB sm 95 tm 77 m ""
+ME
+ME
+MB sm 1 tm 96 m initialize(4)
+ME
+MB sm 1 tm 101 m initialize(4)
+ME
+MB sm 1 tm 102 m initialize(4)
+ME
+MB sm 1 tm 103 m initialize(4)
+ME
+MB sm 1 tm 2 m initialize(5)
+ME
+MB sm 1 tm 9 m initialize(5)
+ME
+MB sm 1 tm 11 m initialize(5)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 5
+ME
+MB sm 1 tm 21 m initialize(5)
+ME
+MB sm 1 tm 22 m initialize(5)
+ME
+MB sm 1 tm 13 m initialize(5)
+ME
+MB sm 1 tm 14 m initialize(5)
+ME
+MB sm 1 tm 29 m initialize(5)
+ME
+MB sm 1 tm 33 m initialize(5)
+ME
+MB sm 1 tm 34 m initialize(5)
+ME
+MB sm 1 tm 39 m initialize(5)
+ME
+MB sm 1 tm 40 m initialize(5)
+ME
+MB sm 1 tm 41 m initialize(5)
+ME
+MB sm 1 tm 19 m initialize(5)
+ME
+MB sm 1 tm 43 m initialize(5)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 5
+ME
+MB sm 1 tm 52 m initialize(5)
+ME
+MB sm 1 tm 53 m initialize(5)
+ME
+MB sm 1 tm 45 m initialize(5)
+ME
+MB sm 1 tm 46 m initialize(5)
+ME
+MB sm 1 tm 60 m initialize(5)
+ME
+MB sm 1 tm 64 m initialize(5)
+ME
+MB sm 1 tm 65 m initialize(5)
+ME
+MB sm 1 tm 70 m initialize(5)
+ME
+MB sm 1 tm 71 m initialize(5)
+ME
+MB sm 1 tm 72 m initialize(5)
+ME
+MB sm 1 tm 74 m initialize(5)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 5
+ME
+MB sm 1 tm 83 m initialize(5)
+ME
+MB sm 1 tm 84 m initialize(5)
+ME
+MB sm 1 tm 76 m initialize(5)
+ME
+MB sm 1 tm 77 m initialize(5)
+ME
+MB sm 1 tm 91 m initialize(5)
+ME
+MB sm 1 tm 95 m initialize(5)
+ME
+MB sm 1 tm 96 m initialize(5)
+ME
+MB sm 1 tm 101 m initialize(5)
+ME
+MB sm 1 tm 102 m initialize(5)
+ME
+MB sm 1 tm 103 m initialize(5)
+ME
+MB sm 1 tm 2 m initialize(6)
+ME
+MB sm 1 tm 9 m initialize(6)
+ME
+MB sm 1 tm 11 m initialize(6)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 6
+ME
+MB sm 1 tm 21 m initialize(6)
+ME
+MB sm 1 tm 22 m initialize(6)
+ME
+MB sm 1 tm 13 m initialize(6)
+MB sm 13 tm 14 m ""
+ME
+MB sm 13 tm 14 m ""
+ME
+ME
+MB sm 1 tm 14 m initialize(6)
+ME
+MB sm 1 tm 29 m initialize(6)
+ME
+MB sm 1 tm 33 m initialize(6)
+ME
+MB sm 1 tm 34 m initialize(6)
+ME
+MB sm 1 tm 39 m initialize(6)
+ME
+MB sm 1 tm 40 m initialize(6)
+ME
+MB sm 1 tm 41 m initialize(6)
+ME
+MB sm 1 tm 19 m initialize(6)
+ME
+MB sm 1 tm 43 m initialize(6)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 6
+ME
+MB sm 1 tm 52 m initialize(6)
+ME
+MB sm 1 tm 53 m initialize(6)
+ME
+MB sm 1 tm 45 m initialize(6)
+MB sm 45 tm 46 m ""
+ME
+MB sm 45 tm 46 m ""
+ME
+ME
+MB sm 1 tm 46 m initialize(6)
+ME
+MB sm 1 tm 60 m initialize(6)
+ME
+MB sm 1 tm 64 m initialize(6)
+ME
+MB sm 1 tm 65 m initialize(6)
+ME
+MB sm 1 tm 70 m initialize(6)
+ME
+MB sm 1 tm 71 m initialize(6)
+ME
+MB sm 1 tm 72 m initialize(6)
+ME
+MB sm 1 tm 74 m initialize(6)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 6
+ME
+MB sm 1 tm 83 m initialize(6)
+ME
+MB sm 1 tm 84 m initialize(6)
+ME
+MB sm 1 tm 76 m initialize(6)
+MB sm 76 tm 77 m ""
+ME
+MB sm 76 tm 77 m ""
+ME
+ME
+MB sm 1 tm 77 m initialize(6)
+ME
+MB sm 1 tm 91 m initialize(6)
+ME
+MB sm 1 tm 95 m initialize(6)
+ME
+MB sm 1 tm 96 m initialize(6)
+ME
+MB sm 1 tm 101 m initialize(6)
+ME
+MB sm 1 tm 102 m initialize(6)
+ME
+MB sm 1 tm 103 m initialize(6)
+ME
+MB sm 1 tm 2 m initialize(7)
+ME
+MB sm 1 tm 9 m initialize(7)
+ME
+MB sm 1 tm 11 m initialize(7)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 7
+ME
+MB sm 1 tm 21 m initialize(7)
+CM id 20 tid 20 eid 20 etid 20 c omnetpp::cMessage n "" pe -1
+BS id 20 tid 20 eid 20 etid 20 c inet::RegisterTransportProtocolCommand n "" pe 0
+SH sm 21 sg 7
+ES t 0
+CL id 20 tid 20 eid 20 etid 20 c inet::RegisterTransportProtocolCommand n "" pe 0 cid 21
+ME
+MB sm 1 tm 22 m initialize(7)
+ME
+MB sm 1 tm 13 m initialize(7)
+ME
+MB sm 1 tm 14 m initialize(7)
+ME
+MB sm 1 tm 29 m initialize(7)
+ME
+MB sm 1 tm 33 m initialize(7)
+ME
+MB sm 1 tm 34 m initialize(7)
+ME
+MB sm 1 tm 39 m initialize(7)
+ME
+MB sm 1 tm 40 m initialize(7)
+ME
+MB sm 1 tm 41 m initialize(7)
+ME
+MB sm 1 tm 19 m initialize(7)
+ME
+MB sm 1 tm 43 m initialize(7)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 7
+ME
+MB sm 1 tm 52 m initialize(7)
+CM id 22 tid 22 eid 22 etid 22 c omnetpp::cMessage n "" pe -1
+BS id 22 tid 22 eid 22 etid 22 c inet::RegisterTransportProtocolCommand n "" pe 0
+SH sm 52 sg 7
+ES t 0
+CL id 22 tid 22 eid 22 etid 22 c inet::RegisterTransportProtocolCommand n "" pe 0 cid 23
+ME
+MB sm 1 tm 53 m initialize(7)
+ME
+MB sm 1 tm 45 m initialize(7)
+ME
+MB sm 1 tm 46 m initialize(7)
+ME
+MB sm 1 tm 60 m initialize(7)
+ME
+MB sm 1 tm 64 m initialize(7)
+ME
+MB sm 1 tm 65 m initialize(7)
+ME
+MB sm 1 tm 70 m initialize(7)
+ME
+MB sm 1 tm 71 m initialize(7)
+ME
+MB sm 1 tm 72 m initialize(7)
+ME
+MB sm 1 tm 74 m initialize(7)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 7
+ME
+MB sm 1 tm 83 m initialize(7)
+CM id 24 tid 24 eid 24 etid 24 c omnetpp::cMessage n "" pe -1
+BS id 24 tid 24 eid 24 etid 24 c inet::RegisterTransportProtocolCommand n "" pe 0
+SH sm 83 sg 7
+ES t 0
+CL id 24 tid 24 eid 24 etid 24 c inet::RegisterTransportProtocolCommand n "" pe 0 cid 25
+ME
+MB sm 1 tm 84 m initialize(7)
+ME
+MB sm 1 tm 76 m initialize(7)
+ME
+MB sm 1 tm 77 m initialize(7)
+ME
+MB sm 1 tm 91 m initialize(7)
+ME
+MB sm 1 tm 95 m initialize(7)
+ME
+MB sm 1 tm 96 m initialize(7)
+ME
+MB sm 1 tm 101 m initialize(7)
+ME
+MB sm 1 tm 102 m initialize(7)
+ME
+MB sm 1 tm 103 m initialize(7)
+ME
+MB sm 1 tm 2 m initialize(8)
+ME
+MB sm 1 tm 9 m initialize(8)
+ME
+MB sm 1 tm 11 m initialize(8)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 8
+ME
+MB sm 1 tm 21 m initialize(8)
+ME
+MB sm 1 tm 22 m initialize(8)
+ME
+MB sm 1 tm 13 m initialize(8)
+ME
+MB sm 1 tm 14 m initialize(8)
+ME
+MB sm 1 tm 29 m initialize(8)
+ME
+MB sm 1 tm 33 m initialize(8)
+ME
+MB sm 1 tm 34 m initialize(8)
+ME
+MB sm 1 tm 39 m initialize(8)
+ME
+MB sm 1 tm 40 m initialize(8)
+ME
+MB sm 1 tm 41 m initialize(8)
+ME
+MB sm 1 tm 19 m initialize(8)
+ME
+MB sm 1 tm 43 m initialize(8)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 8
+ME
+MB sm 1 tm 52 m initialize(8)
+ME
+MB sm 1 tm 53 m initialize(8)
+ME
+MB sm 1 tm 45 m initialize(8)
+ME
+MB sm 1 tm 46 m initialize(8)
+ME
+MB sm 1 tm 60 m initialize(8)
+ME
+MB sm 1 tm 64 m initialize(8)
+ME
+MB sm 1 tm 65 m initialize(8)
+ME
+MB sm 1 tm 70 m initialize(8)
+ME
+MB sm 1 tm 71 m initialize(8)
+ME
+MB sm 1 tm 72 m initialize(8)
+ME
+MB sm 1 tm 74 m initialize(8)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 8
+ME
+MB sm 1 tm 83 m initialize(8)
+ME
+MB sm 1 tm 84 m initialize(8)
+ME
+MB sm 1 tm 76 m initialize(8)
+ME
+MB sm 1 tm 77 m initialize(8)
+ME
+MB sm 1 tm 91 m initialize(8)
+ME
+MB sm 1 tm 95 m initialize(8)
+ME
+MB sm 1 tm 96 m initialize(8)
+ME
+MB sm 1 tm 101 m initialize(8)
+ME
+MB sm 1 tm 102 m initialize(8)
+ME
+MB sm 1 tm 103 m initialize(8)
+ME
+MB sm 1 tm 2 m initialize(9)
+ME
+MB sm 1 tm 9 m initialize(9)
+ME
+MB sm 1 tm 11 m initialize(9)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 9
+ME
+MB sm 1 tm 21 m initialize(9)
+ME
+MB sm 1 tm 22 m initialize(9)
+ME
+MB sm 1 tm 13 m initialize(9)
+ME
+MB sm 1 tm 14 m initialize(9)
+ME
+MB sm 1 tm 29 m initialize(9)
+ME
+MB sm 1 tm 33 m initialize(9)
+ME
+MB sm 1 tm 34 m initialize(9)
+ME
+MB sm 1 tm 39 m initialize(9)
+ME
+MB sm 1 tm 40 m initialize(9)
+ME
+MB sm 1 tm 41 m initialize(9)
+ME
+MB sm 1 tm 19 m initialize(9)
+ME
+MB sm 1 tm 43 m initialize(9)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 9
+ME
+MB sm 1 tm 52 m initialize(9)
+ME
+MB sm 1 tm 53 m initialize(9)
+ME
+MB sm 1 tm 45 m initialize(9)
+ME
+MB sm 1 tm 46 m initialize(9)
+ME
+MB sm 1 tm 60 m initialize(9)
+ME
+MB sm 1 tm 64 m initialize(9)
+ME
+MB sm 1 tm 65 m initialize(9)
+ME
+MB sm 1 tm 70 m initialize(9)
+ME
+MB sm 1 tm 71 m initialize(9)
+ME
+MB sm 1 tm 72 m initialize(9)
+ME
+MB sm 1 tm 74 m initialize(9)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 9
+ME
+MB sm 1 tm 83 m initialize(9)
+ME
+MB sm 1 tm 84 m initialize(9)
+ME
+MB sm 1 tm 76 m initialize(9)
+ME
+MB sm 1 tm 77 m initialize(9)
+ME
+MB sm 1 tm 91 m initialize(9)
+ME
+MB sm 1 tm 95 m initialize(9)
+ME
+MB sm 1 tm 96 m initialize(9)
+ME
+MB sm 1 tm 101 m initialize(9)
+ME
+MB sm 1 tm 102 m initialize(9)
+ME
+MB sm 1 tm 103 m initialize(9)
+ME
+MB sm 1 tm 2 m initialize(10)
+ME
+MB sm 1 tm 9 m initialize(10)
+ME
+MB sm 1 tm 11 m initialize(10)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 10
+ME
+MB sm 1 tm 21 m initialize(10)
+ME
+MB sm 1 tm 22 m initialize(10)
+ME
+MB sm 1 tm 13 m initialize(10)
+ME
+MB sm 1 tm 14 m initialize(10)
+ME
+MB sm 1 tm 29 m initialize(10)
+ME
+MB sm 1 tm 33 m initialize(10)
+ME
+MB sm 1 tm 34 m initialize(10)
+ME
+MB sm 1 tm 39 m initialize(10)
+ME
+MB sm 1 tm 40 m initialize(10)
+ME
+MB sm 1 tm 41 m initialize(10)
+ME
+MB sm 1 tm 19 m initialize(10)
+ME
+MB sm 1 tm 43 m initialize(10)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 10
+ME
+MB sm 1 tm 52 m initialize(10)
+ME
+MB sm 1 tm 53 m initialize(10)
+ME
+MB sm 1 tm 45 m initialize(10)
+ME
+MB sm 1 tm 46 m initialize(10)
+ME
+MB sm 1 tm 60 m initialize(10)
+ME
+MB sm 1 tm 64 m initialize(10)
+ME
+MB sm 1 tm 65 m initialize(10)
+ME
+MB sm 1 tm 70 m initialize(10)
+ME
+MB sm 1 tm 71 m initialize(10)
+ME
+MB sm 1 tm 72 m initialize(10)
+ME
+MB sm 1 tm 74 m initialize(10)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 10
+ME
+MB sm 1 tm 83 m initialize(10)
+ME
+MB sm 1 tm 84 m initialize(10)
+ME
+MB sm 1 tm 76 m initialize(10)
+ME
+MB sm 1 tm 77 m initialize(10)
+ME
+MB sm 1 tm 91 m initialize(10)
+ME
+MB sm 1 tm 95 m initialize(10)
+ME
+MB sm 1 tm 96 m initialize(10)
+ME
+MB sm 1 tm 101 m initialize(10)
+ME
+MB sm 1 tm 102 m initialize(10)
+ME
+MB sm 1 tm 103 m initialize(10)
+ME
+MB sm 1 tm 2 m initialize(11)
+ME
+MB sm 1 tm 9 m initialize(11)
+ME
+MB sm 1 tm 11 m initialize(11)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 11
+ME
+MB sm 1 tm 21 m initialize(11)
+ME
+MB sm 1 tm 22 m initialize(11)
+ME
+MB sm 1 tm 13 m initialize(11)
+ME
+MB sm 1 tm 14 m initialize(11)
+ME
+MB sm 1 tm 29 m initialize(11)
+ME
+MB sm 1 tm 33 m initialize(11)
+ME
+MB sm 1 tm 34 m initialize(11)
+ME
+MB sm 1 tm 39 m initialize(11)
+ME
+MB sm 1 tm 40 m initialize(11)
+ME
+MB sm 1 tm 41 m initialize(11)
+ME
+MB sm 1 tm 19 m initialize(11)
+ME
+MB sm 1 tm 43 m initialize(11)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 11
+ME
+MB sm 1 tm 52 m initialize(11)
+ME
+MB sm 1 tm 53 m initialize(11)
+ME
+MB sm 1 tm 45 m initialize(11)
+ME
+MB sm 1 tm 46 m initialize(11)
+ME
+MB sm 1 tm 60 m initialize(11)
+ME
+MB sm 1 tm 64 m initialize(11)
+ME
+MB sm 1 tm 65 m initialize(11)
+ME
+MB sm 1 tm 70 m initialize(11)
+ME
+MB sm 1 tm 71 m initialize(11)
+ME
+MB sm 1 tm 72 m initialize(11)
+ME
+MB sm 1 tm 74 m initialize(11)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 11
+ME
+MB sm 1 tm 83 m initialize(11)
+ME
+MB sm 1 tm 84 m initialize(11)
+ME
+MB sm 1 tm 76 m initialize(11)
+ME
+MB sm 1 tm 77 m initialize(11)
+ME
+MB sm 1 tm 91 m initialize(11)
+ME
+MB sm 1 tm 95 m initialize(11)
+ME
+MB sm 1 tm 96 m initialize(11)
+ME
+MB sm 1 tm 101 m initialize(11)
+ME
+MB sm 1 tm 102 m initialize(11)
+ME
+MB sm 1 tm 103 m initialize(11)
+ME
+MB sm 1 tm 2 m initialize(12)
+ME
+MB sm 1 tm 9 m initialize(12)
+ME
+MB sm 1 tm 11 m initialize(12)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 12
+ME
+MB sm 1 tm 21 m initialize(12)
+ME
+MB sm 1 tm 22 m initialize(12)
+ME
+MB sm 1 tm 13 m initialize(12)
+ME
+MB sm 1 tm 14 m initialize(12)
+ME
+MB sm 1 tm 29 m initialize(12)
+ME
+MB sm 1 tm 33 m initialize(12)
+ME
+MB sm 1 tm 34 m initialize(12)
+ME
+MB sm 1 tm 39 m initialize(12)
+ME
+MB sm 1 tm 40 m initialize(12)
+ME
+MB sm 1 tm 41 m initialize(12)
+CM id 26 tid 26 eid 26 etid 26 c omnetpp::cMessage n "" pe -1
+BS id 26 tid 26 eid 26 etid 26 c inet::RegisterTransportProtocolCommand n "" pe 0
+SH sm 41 sg 3
+SH sm 18 sg 3
+SH sm 12 sg 3145728
+ES t 0
+CL id 26 tid 26 eid 26 etid 26 c inet::RegisterTransportProtocolCommand n "" pe 0 cid 27
+ME
+MB sm 1 tm 19 m initialize(12)
+BS id 0 tid 0 eid 0 etid 0 c omnetpp::cMessage n expressInterest k 10 pe 0
+ES t 16.99333441793
+ME
+MB sm 1 tm 43 m initialize(12)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 12
+ME
+MB sm 1 tm 52 m initialize(12)
+ME
+MB sm 1 tm 53 m initialize(12)
+ME
+MB sm 1 tm 45 m initialize(12)
+ME
+MB sm 1 tm 46 m initialize(12)
+ME
+MB sm 1 tm 60 m initialize(12)
+ME
+MB sm 1 tm 64 m initialize(12)
+ME
+MB sm 1 tm 65 m initialize(12)
+ME
+MB sm 1 tm 70 m initialize(12)
+ME
+MB sm 1 tm 71 m initialize(12)
+ME
+MB sm 1 tm 72 m initialize(12)
+CM id 28 tid 28 eid 28 etid 28 c omnetpp::cMessage n "" pe -1
+BS id 28 tid 28 eid 28 etid 28 c inet::RegisterTransportProtocolCommand n "" pe 0
+SH sm 72 sg 3
+SH sm 50 sg 3
+SH sm 44 sg 3145728
+ES t 0
+CL id 28 tid 28 eid 28 etid 28 c inet::RegisterTransportProtocolCommand n "" pe 0 cid 29
+ME
+MB sm 1 tm 74 m initialize(12)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 12
+ME
+MB sm 1 tm 83 m initialize(12)
+ME
+MB sm 1 tm 84 m initialize(12)
+ME
+MB sm 1 tm 76 m initialize(12)
+ME
+MB sm 1 tm 77 m initialize(12)
+ME
+MB sm 1 tm 91 m initialize(12)
+ME
+MB sm 1 tm 95 m initialize(12)
+ME
+MB sm 1 tm 96 m initialize(12)
+ME
+MB sm 1 tm 101 m initialize(12)
+ME
+MB sm 1 tm 102 m initialize(12)
+ME
+MB sm 1 tm 103 m initialize(12)
+CM id 30 tid 30 eid 30 etid 30 c omnetpp::cMessage n "" pe -1
+BS id 30 tid 30 eid 30 etid 30 c inet::RegisterTransportProtocolCommand n "" pe 0
+SH sm 103 sg 3
+SH sm 81 sg 3
+SH sm 75 sg 3145728
+ES t 0
+CL id 30 tid 30 eid 30 etid 30 c inet::RegisterTransportProtocolCommand n "" pe 0 cid 31
+ME
+MB sm 1 tm 2 m initialize(13)
+- INFO (IdealRadioMedium)NdnSimple.radioMedium: Initialized (inet::physicallayer::RadioMedium)radioMedium, propagation = { ConstantSpeedPropagation, ignoreMovementDuringTransmission = 1, ignoreMovementDuringPropagation = 1, ignoreMovementDuringReception = 1, propagationSpeed = 2.99792e+08 mps }, pathLoss = { FreeSpacePathLoss, alpha = 2, systemLoss = 1 }, analogModel = { IdealAnalogModel }, obstacleLoss = nullptr, backgroundNoise = nullptr, mediumLimitCache = { RadioMediumLimits, minConstraintArea = (20, 20, 0), maxConstraintArea = (60, 60, 0), maxSpeed = 0 mps, maxTransmissionPower = nan W, minInterferencePower = nan W, minReceptionPower = nan W, maxAntennaGain = 1, minInterferenceTime = 0.000000000001, maxTransmissionDuration = 0.01, maxCommunicationRange = -nan m, maxInterferenceRange = -nan m }, neighborCache = nullptr, communicationCache = { VectorCommunicationCache }
+ME
+MB sm 1 tm 9 m initialize(13)
+ME
+MB sm 1 tm 11 m initialize(13)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleConsumer.mobility: initializing MobilityBase stage 13
+ME
+MB sm 1 tm 21 m initialize(13)
+ME
+MB sm 1 tm 22 m initialize(13)
+ME
+MB sm 1 tm 13 m initialize(13)
+ME
+MB sm 1 tm 14 m initialize(13)
+ME
+MB sm 1 tm 29 m initialize(13)
+ME
+MB sm 1 tm 33 m initialize(13)
+ME
+MB sm 1 tm 34 m initialize(13)
+- INFO (IdealRadio)NdnSimple.ndnSimpleConsumer.wlan[0].radio: Initialized (inet::physicallayer::Radio)radio, antenna = { IsotropicAntenna }, transmitter = { IdealTransmitter, preambleDuration = 0, headerBitLength = 0, bitrate = 250000 bps, communicationRange = 35 m, interferenceRange = 35 m, detectionRange = 35 m }, receiver = { IdealReceiver, considering interference }
+ME
+MB sm 1 tm 39 m initialize(13)
+ME
+MB sm 1 tm 40 m initialize(13)
+ME
+MB sm 1 tm 41 m initialize(13)
+ME
+MB sm 1 tm 19 m initialize(13)
+ME
+MB sm 1 tm 43 m initialize(13)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleRouter.mobility: initializing MobilityBase stage 13
+ME
+MB sm 1 tm 52 m initialize(13)
+ME
+MB sm 1 tm 53 m initialize(13)
+ME
+MB sm 1 tm 45 m initialize(13)
+ME
+MB sm 1 tm 46 m initialize(13)
+ME
+MB sm 1 tm 60 m initialize(13)
+ME
+MB sm 1 tm 64 m initialize(13)
+ME
+MB sm 1 tm 65 m initialize(13)
+- INFO (IdealRadio)NdnSimple.ndnSimpleRouter.wlan[0].radio: Initialized (inet::physicallayer::Radio)radio, antenna = { IsotropicAntenna }, transmitter = { IdealTransmitter, preambleDuration = 0, headerBitLength = 0, bitrate = 250000 bps, communicationRange = 35 m, interferenceRange = 35 m, detectionRange = 35 m }, receiver = { IdealReceiver, considering interference }
+ME
+MB sm 1 tm 70 m initialize(13)
+ME
+MB sm 1 tm 71 m initialize(13)
+ME
+MB sm 1 tm 72 m initialize(13)
+ME
+MB sm 1 tm 74 m initialize(13)
+- TRACE (StationaryMobility)NdnSimple.ndnSimpleProducer.mobility: initializing MobilityBase stage 13
+ME
+MB sm 1 tm 83 m initialize(13)
+ME
+MB sm 1 tm 84 m initialize(13)
+ME
+MB sm 1 tm 76 m initialize(13)
+ME
+MB sm 1 tm 77 m initialize(13)
+ME
+MB sm 1 tm 91 m initialize(13)
+ME
+MB sm 1 tm 95 m initialize(13)
+ME
+MB sm 1 tm 96 m initialize(13)
+- INFO (IdealRadio)NdnSimple.ndnSimpleProducer.wlan[0].radio: Initialized (inet::physicallayer::Radio)radio, antenna = { IsotropicAntenna }, transmitter = { IdealTransmitter, preambleDuration = 0, headerBitLength = 0, bitrate = 250000 bps, communicationRange = 35 m, interferenceRange = 35 m, detectionRange = 35 m }, receiver = { IdealReceiver, considering interference }
+ME
+MB sm 1 tm 101 m initialize(13)
+ME
+MB sm 1 tm 102 m initialize(13)
+ME
+MB sm 1 tm 103 m initialize(13)
+ME
+MS id 14 d "t=2 interfaces;is=s;p=53,300;i=block/table"
+MS id 29 d "t=rcv:0 snt:0;p=98,207;i=block/rxtx"
+MS id 32 d "t=q rcvd: 0\nq dropped: 0;q=l2queue;p=23,125;i=block/queue"
+MS id 3 d p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02=35;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02=35,,blue;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 41 d "t=rcvd: 0 pks\nsent: 0 pks;q=queue;p=85,95;i=block/source"
+MS id 19 d "t=rcvd: 0 pks\nsent: 0 pks;p=100,80;i=block/source"
+MS id 46 d "t=2 interfaces;is=s;p=53,300;i=block/table"
+MS id 60 d "t=rcv:0 snt:0;p=98,207;i=block/rxtx"
+MS id 63 d "t=q rcvd: 0\nq dropped: 0;q=l2queue;p=23,125;i=block/queue"
+MS id 4 d p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35,,blue;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 72 d "t=rcvd: 0 pks\nsent: 0 pks;q=queue;p=85,95;i=block/source"
+MS id 77 d "t=2 interfaces;is=s;p=53,300;i=block/table"
+MS id 91 d "t=rcv:0 snt:0;p=98,207;i=block/rxtx"
+MS id 94 d "t=q rcvd: 0\nq dropped: 0;q=l2queue;p=23,125;i=block/queue"
+MS id 5 d p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35,,blue;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 103 d "t=rcvd: 0 pks\nsent: 0 pks;q=queue;p=85,95;i=block/source"
+MS id 3 d r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01;r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35;r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35,,gray;r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02=35;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02=35,,blue;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11;r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35;r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35,,gray;r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35,,blue;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21;r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35;r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35,,gray;r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35,,blue;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01;r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35;r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35,,gray;r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02=35;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02=35,,blue;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11;r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35;r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35,,gray;r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35,,blue;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21;r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35;r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35,,gray;r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35,,blue;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+
+E # 1 t 0 m 20 ce 0 msg 20
+DM id 20 tid 20 eid 20 etid 20 c omnetpp::cMessage n "" pe 1
+MS id 3 d r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01;r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35;r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35,,gray;r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02=35;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02=35,,blue;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11;r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35;r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35,,gray;r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35,,blue;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21;r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35;r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35,,gray;r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35,,blue;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01;r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35;r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35,,gray;r02=35,,blue;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02=35;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 3 d r02=35,,blue;r01=35,,gray;p=20.000000,20.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11;r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35;r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35,,gray;r12=35,,blue;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 4 d r12=35,,blue;r11=35,,gray;p=40.000000,40.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21;r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35;r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35,,gray;r22=35,,blue;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
+MS id 5 d r22=35,,blue;r21=35,,gray;p=60.000000,60.000000;i=device/wifilaptop;bgb=,448
