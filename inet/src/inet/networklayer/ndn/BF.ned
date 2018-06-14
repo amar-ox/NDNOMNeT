@@ -16,15 +16,28 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.networklayer.contract.ndn;
+package inet.networklayer.ndn;
 
-import inet.networklayer.contract.INetworkProtocol;
+import inet.networklayer.contract.ndn.IForwarding;
 
-moduleinterface IForwarding extends INetworkProtocol
+simple BF like IForwarding
 {
-    parameters:        
+    parameters:
+        string interfaceTableModule;
+        string pitModule = default("^.pit");
+        string fibModule = default("^.fib");
+        string csModule = default("^.cs"); 
+        string xuModule = default("^.xu"); 
+        int ndnMacMapping = default(11);
+        bool forwarding;
+        bool cacheUnsolicited = default(false);
         @display("i=block/switch");
-	gates:        
+    gates:
+        input upperLayerIn[];
+        output upperLayerOut[];
+        input lowerLayerIn[];
+        output lowerLayerOut[];
+
         input pitIn;
         output pitOut;
         input fibIn;
@@ -34,4 +47,3 @@ moduleinterface IForwarding extends INetworkProtocol
         input xIn;
         output xOut;
 }
-

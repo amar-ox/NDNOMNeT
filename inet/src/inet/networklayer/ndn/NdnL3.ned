@@ -19,11 +19,21 @@
 package inet.networklayer.ndn;
 
 import inet.networklayer.contract.INetworkLayer;
+import inet.networklayer.contract.ndn.IForwarding;
+import inet.networklayer.contract.ndn.IPit;
+import inet.networklayer.contract.ndn.IFib;
+import inet.networklayer.contract.ndn.ICs;
+import inet.networklayer.contract.ndn.IXu;
 
 module NdnL3 like INetworkLayer
 {
     parameters:
         string interfaceTableModule;
+        string forwardingType = default("ForwardingBase");
+        string pitType = default("PitBase");
+        string fibType = default("FibBase");
+        string csType = default("CsBase");
+        string xuType = default("Xu");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/fork;bgb=381,190");
 
@@ -32,27 +42,27 @@ module NdnL3 like INetworkLayer
         output ifOut[];
         input transportIn[];
         output transportOut[];
-        input pingIn[] @labels(PingPayload/down);
-        output pingOut[] @labels(PingPayload/up);
+        input pingIn[];
+        output pingOut[];
 
-    submodules:
-        forwarding: ForwardingBase {
+    submodules:       
+        forwarding: <forwardingType> like IForwarding {
             parameters:
                 @display("p=191,105;q=queue");
         }
-        pit: PitBase {
+        pit: <pitType> like IPit {
             parameters:
                 @display("p=315,144");
         }
-        fib: FibBase {
+        fib: <fibType> like IFib {
             parameters:
                 @display("p=58,66");
         }
-        cs: CsBase {
+        cs: <csType> like ICs {
             parameters:
                 @display("p=58,144");
         }
-        xu: Xu {
+        xu: <xuType> like IXu {
             parameters:
                 @display("p=315,66");
         }

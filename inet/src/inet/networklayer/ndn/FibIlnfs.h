@@ -16,8 +16,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __INET_FIB_BASE_H_
-#define __INET_FIB_BASE_H_
+#ifndef __INET_FIB_ILNFS_H_
+#define __INET_FIB_ILNFS_H_
 
 #include <vector>
 #include <string>
@@ -30,23 +30,52 @@
 using namespace omnetpp;
 namespace inet {
 
-
-class INET_API FibBase : public cSimpleModule, public IFib
+class INET_API IlnfsEntry : public BaseEntry
 {
 public:
-    FibBase();
+    IlnfsEntry(std::string prefix, cGate* face, MACAddress dest, int entryLifetime, float mhc, float a)
+    : BaseEntry(prefix, face, dest, entryLifetime), minHeardCost(mhc)
+    {
+        cost = 0.;
+        cost = (1. - a) * cost + a * (1 + mhc);
+    }
+
+    float getCost() { return cost; }
+    void resetCost(float max_delta)
+    {
+        minHeardCost = max_delta;
+        cost = 0;
+    }
+    void updateCost(float c, float a, MACAddress dest)
+    {
+        if ( c < minHeardCost ){
+            minHeardCost = c;
+            cost = (1. - a) * cost + a * (1 + minHeardCost);
+            macDest = dest;
+        }
+        else if ( c == minHeardCost )
+            minHeardCost = c;
+    }
+
+private:
+    float minHeardCost;
+    float cost;
+};
+
+
+class INET_API FibIlnfs : public cSimpleModule, public IFib
+{
+public:
+    FibIlnfs();
 
     /* */
-    virtual ~FibBase();
+    virtual ~FibIlnfs();
 
     /* */
     virtual BaseEntry* lookup(NdnPacket* packet) override;
 
     /* */
     virtual bool registerPrefix(const char* prefix, cGate* face, MACAddress dest) override;
-
-    /* */
-    virtual bool create(const char* name, short length, cGate* face, MACAddress dest, float p1 = 0, float p2 = 0) override;
 
     /* */
     virtual bool remove(const char* prefix) override;
@@ -61,10 +90,20 @@ public:
     virtual void finish() override;
 
     /* */
+    virtual bool create(const char* name, short length, cGate* face, MACAddress dest, float mhc = 0, float a = 1) override;
+
+    /* */
+    virtual float updateCost(const char* name, short length, cGate* face, MACAddress dest, float c, float a);
+
+    /* */
+    virtual bool resetCost(const char* name, float max_delta);
+
+public:
+    /* */
     static simsignal_t entryExpiredSignal;
 
-protected:
-    std::vector<BaseEntry *> entries;
+private:
+    std::vector<IlnfsEntry *> entries;
     cMessage *checkExpired = new cMessage("pe");
     unsigned maxSize;
     int entryLifetime;
@@ -78,6 +117,7 @@ protected:
     /* */
     virtual bool match(const char* name, unsigned* index);
 
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void print();

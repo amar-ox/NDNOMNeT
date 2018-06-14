@@ -18,10 +18,10 @@
 
 package inet.networklayer.ndn;
 
-import inet.networklayer.contract.INetworkProtocol;
+//import inet.networklayer.contract.INetworkProtocol;
 import inet.networklayer.contract.ndn.IForwarding;
 
-simple ForwardingBase like INetworkProtocol, IForwarding
+simple ForwardingBase like IForwarding
 {
     parameters:
         string interfaceTableModule;

@@ -25,25 +25,25 @@ network NdnDemo
 {
     parameters:
         int numRouters;
-        int numProducers;        
+        int numProducers;
         @display("bgb=100,100;bgg=100,1,grey95");
     submodules:
         radioMedium: IdealRadioMedium {
             @display("p=649,75");
         }
-        ndnProd[numProducers] : NdnWirelessHost {
+        ndnProd[numProducers]: NdnWirelessHost {
             parameters:
-               @display("p=50,50");
+                @display("p=49.92,82.159996");
         }
-                
+
         ndnRt[numRouters]: NdnWirelessHostBase {
             parameters:
                 @display("p=0,0");
         }
-              
-        ndnCons : NdnWirelessHost {
+
+        ndnCons: NdnWirelessHost {
             parameters:
-               @display("p=10,10");
-        } 
+                @display("p=49.92,17.333334");
+        }
 }
 

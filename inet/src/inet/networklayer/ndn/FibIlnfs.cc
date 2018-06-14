@@ -16,33 +16,33 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "FibBase.h"
+#include "FibIlnfs.h"
 
 namespace inet {
 using std::cout;
 
-simsignal_t FibBase::entryExpiredSignal = cComponent::registerSignal("entryExpired");
+simsignal_t FibIlnfs::entryExpiredSignal = cComponent::registerSignal("entryExpired");
 Register_Abstract_Class(IFib::Notification);
-Define_Module(FibBase);
+Define_Module(FibIlnfs);
 
-FibBase::FibBase()
+FibIlnfs::FibIlnfs()
 {
 }
 
-FibBase::~FibBase()
+FibIlnfs::~FibIlnfs()
 {
     cancelAndDelete(checkExpired);
     entries.erase(entries.begin(), entries.end());
 }
 
-void FibBase::initialize()
+void FibIlnfs::initialize()
 {
     maxSize = par("maxSize");
     entryLifetime = par("entryLifetime");
     entries.clear();
 }
 
-void FibBase::handleMessage(cMessage *msg)
+void FibIlnfs::handleMessage(cMessage *msg)
 {
     if ( msg->isSelfMessage() ){
         cleanExpired();
@@ -52,7 +52,7 @@ void FibBase::handleMessage(cMessage *msg)
         delete msg;
 }
 
-BaseEntry* FibBase::lookup(NdnPacket* packet)
+BaseEntry* FibIlnfs::lookup(NdnPacket* packet)
 {
     Enter_Method("lookup(...)");
     unsigned index = -1;
@@ -70,14 +70,14 @@ BaseEntry* FibBase::lookup(NdnPacket* packet)
     return nullptr;
 }
 
-bool FibBase::registerPrefix(const char* prefix, cGate* face, MACAddress dest)
+bool FibIlnfs::registerPrefix(const char* prefix, cGate* face, MACAddress dest)
 {
     Enter_Method("registerPrefix(...)");
     unsigned index = -1;
     if ( !match(prefix, &index) && (entries.size() < maxSize) ){
         std::string stringPrefix(prefix, strlen(prefix));
         cout << simTime() << "\t" << getFullPath() << ": Insert prefix: " << stringPrefix << " | " << "Face: " << face << " (local)" << endl;
-        BaseEntry *e = new BaseEntry(stringPrefix, face, dest, 100000);
+        IlnfsEntry *e = new IlnfsEntry(stringPrefix, face, dest, 100000, 0, 1);
         entries.push_back(e);
         numAdded++;
         return true;
@@ -87,11 +87,11 @@ bool FibBase::registerPrefix(const char* prefix, cGate* face, MACAddress dest)
     }
 }
 
-bool FibBase::create(const char* name, short length, cGate* face, MACAddress dest, float p1, float p2)
+bool FibIlnfs::create(const char* name, short length, cGate* face, MACAddress dest, float mhc, float a)
 {
     Enter_Method("create(...)");
     unsigned index = -1;
-    if ( match(name, &index) ){ // TODO: improve matching lookup
+    if ( match(name, &index) ){
         cout << simTime() << "\t" << getFullPath() << ": Update prefix: " << name << ": " << dest.str().c_str() << endl;
         entries.at(index)->setMacDest(dest);
         entries.at(index)->markNotErased();
@@ -104,21 +104,20 @@ bool FibBase::create(const char* name, short length, cGate* face, MACAddress des
     }
     cout << simTime() << "\t" << getFullPath() << ": Insert prefix: " << name << ": " << dest.str().c_str() << endl;
     std::string prefix(name, length);
-    BaseEntry *e = new BaseEntry(prefix, face, dest, entryLifetime);
+    IlnfsEntry *e = new IlnfsEntry(prefix, face, dest, entryLifetime, mhc, a);
     entries.push_back(e);
     numAdded++;
     if (! checkExpired->isScheduled())
         scheduleAt(simTime() + SimTime(1000, SIMTIME_MS), checkExpired);
-    print();
     return true;
 }
 
-bool FibBase::remove(const char* prefix)
+bool FibIlnfs::remove(const char* prefix)
 {
     Enter_Method("remove(...)");
     if (entries.empty())
         return false;
-    std::vector<BaseEntry *>::iterator it;
+    std::vector<IlnfsEntry *>::iterator it;
     for (it = entries.begin(); it != entries.end(); ++it){
         if ( ! strcmp((*it)->getPrefix().c_str(), prefix) ){
             cout << simTime() << "\t" << getFullPath() << ": Remove expired entry (" << prefix << ")" << endl;
@@ -130,11 +129,11 @@ bool FibBase::remove(const char* prefix)
     return false;
 }
 
-void FibBase::cleanExpired()
+void FibIlnfs::cleanExpired()
 {
     if (entries.empty())
         return;
-    std::vector<BaseEntry *>::iterator it; /* FIXME: use auto*/
+    std::vector<IlnfsEntry *>::iterator it;
     for (it = entries.begin(); it != entries.end(); ++it){
         if ( !(*it)->isErased() && ((*it)->getExpireAt() <= simTime()) ){
             numExpired++;
@@ -146,7 +145,7 @@ void FibBase::cleanExpired()
     }
 }
 
-bool FibBase::match(const char* name, unsigned* index)
+bool FibIlnfs::match(const char* name, unsigned* index)
 {
     if ( entries.empty() )
         return false;
@@ -160,14 +159,14 @@ bool FibBase::match(const char* name, unsigned* index)
     return false;
 }
 
-void FibBase::refreshDisplay() const
+void FibIlnfs::refreshDisplay() const
 {
     char buf[40];
     sprintf(buf, "Size: %d entries", (int)entries.size());
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void FibBase::finish()
+void FibIlnfs::finish()
 {
     recordScalar("added", numAdded);
     recordScalar("removed", numRemoved);
@@ -178,17 +177,16 @@ void FibBase::finish()
     cout << "---------------------------------------------------------------------------------------------------------------" << endl;
     cout << getFullPath() << ": " << numAdded << " added, " << numRemoved << " removed, " << numMatched << " matched, " << numMissed << " missed, " << numExpired << " expired" << endl;
     cout << "---------------------------------------------------------------------------------------------------------------" << endl;
-    //prefixLengthStat.recordAs("prefixLength");
 }
 
-void FibBase::print()
+void FibIlnfs::print()
 {
-    Enter_Method("print()");
+    Enter_Method_Silent();
     char buf[65];
     cout << getFullPath() << ": -- Forwarding Information Base --" << endl;
     sprintf (buf, "%-32s %-15s %-17s\n", "Prefix", "Face", "MAC@");
     cout << buf;
-    std::vector<BaseEntry *>::iterator it;
+    std::vector<IlnfsEntry *>::iterator it;
     for (it = entries.begin(); it != entries.end(); ++it){
         sprintf (buf, "%-32s %-15s %-17s\n",
                 (*it)->getPrefix().c_str(),
@@ -198,5 +196,44 @@ void FibBase::print()
     }
     cout << endl;
 }
+
+float FibIlnfs::updateCost(const char* name, short length, cGate* face, MACAddress dest, float c, float a)
+{
+    Enter_Method("updateCost(...)");
+    unsigned index = -1;
+    if ( match(name, &index) ){
+        cout << simTime() << "\t" << getFullPath() << ": Update prefix: " << name << ": " << dest.str().c_str() << endl;
+        entries.at(index)->updateCost(c, a, dest);
+        entries.at(index)->markNotErased();
+        entries.at(index)->setExpireAt(simTime() + SimTime(entryLifetime, SIMTIME_MS));
+        return entries.at(index)->getCost();
+    }
+
+    if ( entries.size() >= maxSize ){
+        cout << simTime() << "\t" << getFullPath() << ": FIB full. Cannot create" << endl;
+        return -1;
+    }
+    cout << simTime() << "\t" << getFullPath() << ": Create entry for: " << name << ": " << dest.str().c_str() << endl;
+    std::string prefix(name, length);
+    IlnfsEntry *e = new IlnfsEntry(prefix, face, dest, entryLifetime, c, a);
+    entries.push_back(e);
+    numAdded++;
+    if (! checkExpired->isScheduled())
+        scheduleAt(simTime() + SimTime(1000, SIMTIME_MS), checkExpired);
+    return e->getCost();
+}
+
+bool FibIlnfs::resetCost(const char* name, float max_delta)
+{
+    Enter_Method("resetCost(...)");
+    unsigned index = 0;
+    if ( match(name, &index) ){
+        cout << getFullPath() << ": Reset cost for: "<< entries.at(index)->getPrefix() << endl;
+        entries.at(index)->resetCost(max_delta);
+        return true;
+    }
+    return false;
+}
+
 
 } //namespace

@@ -26,70 +26,72 @@
 
 namespace inet {
 
+// TODO: make interface
+class INET_API BaseEntry
+{
+public:
+    BaseEntry(std::string prefix, cGate* face, MACAddress dest, int entryLifetime)
+    : prefix(prefix), face(face), macDest(dest)
+    {
+        expireAt = simTime() + SimTime(entryLifetime, SIMTIME_MS);
+        erased = false;
+    }
+
+    std::string getPrefix() { return prefix; }
+    cGate* getFace() { return face; }
+    simtime_t getExpireAt() { return expireAt; }
+    MACAddress getMacDest() { return macDest; }
+    bool isErased() { return erased; }
+    void setFace(cGate* f) { face = f; }
+    void setExpireAt(simtime_t t) { expireAt = t; }
+    void setMacDest(MACAddress dest) { macDest = dest; }
+    void markErased() { erased = true; }
+    void markNotErased() { erased = false; }
+
+protected:
+    std::string prefix;
+    cGate* face;
+    MACAddress macDest;
+    simtime_t expireAt;
+    bool erased;
+};
+
+
+
 class INET_API IFib
 {
-    public:
-    class FibEntry
-        {
-        public:
-            FibEntry(std::string prefix, cGate* face, MACAddress dest, int entryLifetime): prefix(prefix), face(face)
-            {
-                expireAt = simTime() + SimTime(entryLifetime, SIMTIME_MS);
-                erased = false;
-                macDest = dest;
-            }
-
-            std::string getPrefix(){ return prefix; }
-            cGate* getFace(){ return face; }
-            simtime_t getExpireAt(){ return expireAt; }
-            MACAddress getMacDest(){ return macDest; }
-            bool isErased(){ return erased; }
-            void setFace(cGate* f){ face = f; }
-            void setExpireAt(simtime_t t){ expireAt = t; }
-            void setMacDest(MACAddress dest){ macDest = dest; }
-            void markErased(){ erased = true; }
-            void markNotErased() { erased = false; }
-
-        private:
-            MACAddress macDest;
-            std::string prefix;
-            cGate* face;
-            simtime_t expireAt;
-            bool erased;
-        };
-
+public:
     class Notification : public cObject
-        {
-        public:
-            const char *prefix;
-            cGate* face;
-            MACAddress macDest;
+    {
+    public:
+        const char *prefix;
+        cGate* face;
+        MACAddress macDest;
 
-        public:
-            Notification(const char *prefix, cGate *face, MACAddress dest): prefix(prefix), face(face) { macDest = dest; }
-        };
+    public:
+        Notification(const char *prefix, cGate *face, MACAddress dest): prefix(prefix), face(face) { macDest = dest; }
+    };
 
 public:
     virtual ~IFib() {}
 
     /* */
-    virtual FibEntry* lookup(NdnPacket* packet) = 0;
+    virtual BaseEntry* lookup(NdnPacket* packet) = 0;
 
     /* */
     virtual bool registerPrefix(const char* prefix, cGate* face, MACAddress dest) = 0;
 
     /* */
-    virtual bool create(const char* prefix, short length, cGate* face, MACAddress dest) = 0;
+    virtual bool create(const char* name, short length, cGate* face, MACAddress dest, float p1 = 0, float p2 = 0) = 0;
 
     /* */
     virtual bool remove(const char* prefix) = 0;
 
     /* */
     virtual void cleanExpired() = 0;
-
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_IPIT_H
+#endif
 

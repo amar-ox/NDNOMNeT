@@ -29,6 +29,7 @@ packet NdnPacket
     int seqNo = 0; 				// for stats only
     short prefixLength = 1;		// for help :)
     bool flood = false;  
+    float cost = 0;
 };
 
 

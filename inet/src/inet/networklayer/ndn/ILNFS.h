@@ -16,8 +16,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __NDN_FORWARDING_BASE_H
-#define __NDN_FORWARDING_BASE_H
+#ifndef __NDN_ILNFS_H
+#define __NDN_ILNFS_H
 
 #include <vector>
 #include <string>
@@ -44,15 +44,20 @@
 #include "packets/NdnPackets_m.h"
 #include "packets/Tools.h"
 
-#define DW 127
+#define DW 255
 #define DEFER_SLOT_TIME 0.028
-#define HISTORY_SIZE 10
 #define TIMEOUT_CODE 100
 #define REGISTER_PREFIX_CODE 15
 #define DEFAULT_MAC_IF 0
 
+#define M 9.
+#define N 3.5
+#define DELTA_MAX 8.
+#define TH 0.75
+#define ALPHA 0.8
+
 namespace inet {
-class INET_API ForwardingBase : public cSimpleModule, public IForwarding, public ILifecycle, protected cListener
+class INET_API ILNFS : public cSimpleModule, public IForwarding, public ILifecycle, protected cListener
 {
 protected:
     SendDelayed* sendDelayedPacket = new SendDelayed("ft");
@@ -65,7 +70,7 @@ protected:
 
     /* NDN tables */
     PitBase *pit;
-    FibBase *fib;
+    FibIlnfs *fib;
     CsBase *cs;
 
     /* router stat */
@@ -77,6 +82,10 @@ protected:
     int numDataReceived = 0;
     int numDataUnsolicited = 0;
     int numDataFwd = 0;
+
+    /* delay adjustment */
+    int neighborI = 0;
+    int neighborD = 0;
 
     /* Omnet stuff */
     virtual void initialize(int stage) override;
@@ -125,19 +134,24 @@ protected:
     /* */
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    /**
-     * ILifecycle method
-     */
+    /* */
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+
     /* */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
+    /* */
+    virtual float computeTheta();
+
+    /* */
+    virtual float computeDelay(float delta);
+
   public:
-    ForwardingBase();
-    virtual ~ForwardingBase();
+    ILNFS();
+    virtual ~ILNFS();
 };
 
 } // namespace inet
 
-#endif // ifndef __NDN_FORWARDING_H
+#endif
 

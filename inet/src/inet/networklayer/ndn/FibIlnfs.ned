@@ -16,9 +16,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "IFib.h"
+package inet.networklayer.ndn;
 
-namespace inet {
+import inet.networklayer.contract.ndn.IFib; 
 
-} // namespace inet
-
+simple FibIlnfs like IFib
+{
+    parameters:
+        int maxSize = default(50);
+        int entryLifetime @unit("ms") = default(10000ms);
+        @signal[entryExpired](type=IFib::Notification);
+        @display("i=block/table");
+        
+	gates:
+		output fibOut;
+        input fibIn;       
+}

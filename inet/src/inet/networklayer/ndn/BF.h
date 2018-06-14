@@ -16,8 +16,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __NDN_FORWARDING_BASE_H
-#define __NDN_FORWARDING_BASE_H
+#ifndef __NDN_BF_H
+#define __NDN_BF_H
 
 #include <vector>
 #include <string>
@@ -38,13 +38,11 @@
 
 #include "PitBase.h"
 #include "FibBase.h"
-#include "FibIlnfs.h"
 #include "CsBase.h"
-#include "Xu.h"
 #include "packets/NdnPackets_m.h"
 #include "packets/Tools.h"
 
-#define DW 127
+#define DW 1023
 #define DEFER_SLOT_TIME 0.028
 #define HISTORY_SIZE 10
 #define TIMEOUT_CODE 100
@@ -52,7 +50,7 @@
 #define DEFAULT_MAC_IF 0
 
 namespace inet {
-class INET_API ForwardingBase : public cSimpleModule, public IForwarding, public ILifecycle, protected cListener
+class INET_API BF : public cSimpleModule, public IForwarding, public ILifecycle, protected cListener
 {
 protected:
     SendDelayed* sendDelayedPacket = new SendDelayed("ft");
@@ -133,8 +131,8 @@ protected:
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
   public:
-    ForwardingBase();
-    virtual ~ForwardingBase();
+    BF();
+    virtual ~BF();
 };
 
 } // namespace inet
