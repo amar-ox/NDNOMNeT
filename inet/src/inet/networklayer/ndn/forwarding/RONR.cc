@@ -16,12 +16,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "BF.h"
+#include "RONR.h"
 
 namespace inet {
 using std::cout;
 
-Define_Module(BF);
+Define_Module(RONR);
 
 enum NdnMacMappingCodes {
     IB_DB = 11, // Interest broadcast, Data broadcast
@@ -30,18 +30,15 @@ enum NdnMacMappingCodes {
     IU_DU,      // Interest unicast, Data unicast
 };
 
-BF::BF()
+RONR::RONR()
 {
 }
 
-BF::~BF()
+RONR::~RONR()
 {
-    if (waiting)
-        delete sendDelayedPacket->getDelayedPacket();
-    cancelAndDelete(sendDelayedPacket);
 }
 
-void BF::initialize(int stage)
+void RONR::initialize(int stage)
     {
     cSimpleModule::initialize(stage);
 
@@ -67,8 +64,6 @@ void BF::initialize(int stage)
 
         WATCH(numIntReceived);
         WATCH(numIntFwd);
-        WATCH(numIntCanceled);
-        WATCH(numDataCanceled);
         WATCH(numDataReceived);
         WATCH(numDataUnsolicited);
         WATCH(numDataFwd);
@@ -84,59 +79,24 @@ void BF::initialize(int stage)
     }
 }
 
-void BF::handleMessage(cMessage *msg)
+void RONR::handleMessage(cMessage *msg)
 {
-    if ( msg == sendDelayedPacket ){
-        SendDelayed *sd  = check_and_cast<SendDelayed *>(msg);
-        if( sd->getType() == INTEREST ){
-            Interest * interest = check_and_cast<Interest *>(sd->getDelayedPacket());
-            forwardInterestToRemote(interest->dup(), sd->getFace(), MACAddress(sd->getMacSrc()), MACAddress(sd->getMacDest()));
-            numIntFwd++;
-        }
-        else{
-            Data *data = check_and_cast<Data *>(sd->getDelayedPacket());
-            forwardDataToRemote(data->dup(), sd->getFace(), MACAddress(sd->getMacDest()));
-            numDataFwd++;
-        }
-        delete sd->getDelayedPacket();
-        waiting = false;
-    }
-    else if ( msg->isPacket() ){
+    if ( msg->isPacket() ){
         if ( msg->getKind() == REGISTER_PREFIX_CODE){
             cout << simTime() << "\t" << getFullPath() << ": Register prefix (" << msg->getName() << ")" << endl;
             fib->registerPrefix(msg->getName(), msg->getArrivalGate(), myMacAddress);
             delete msg;
             return;
         }
-        NdnPacket* ndnPacket = check_and_cast<NdnPacket *>(msg);
-        if ( waiting ){
-            /* enqueue? */
-            if ( !strcmp(ndnPacket->getName(), sendDelayedPacket->getDelayedPacket()->getName()) ){
-                cout << simTime() << "\t" << getFullPath() << ": Cancel delayed transmission ("
-                        << sendDelayedPacket->getDelayedPacket()->getName() << "), Type: "
-                        << sendDelayedPacket->getDelayedPacket()->getType() << endl;
-                cancelEvent(sendDelayedPacket);
-                delete sendDelayedPacket->getDelayedPacket();
-                waiting = false;
-                if (ndnPacket->getType() == INTEREST)
-                    numIntCanceled++;
-                else
-                    numDataCanceled++;
-            }
-            delete ndnPacket;
-            return;
-        }
-        else
-            dispatchPacket(check_and_cast<NdnPacket *>(msg));
+        dispatchPacket(check_and_cast<NdnPacket *>(msg));
     }else
         delete msg;
 }
 
-void BF::dispatchPacket(NdnPacket *packet)
+void RONR::dispatchPacket(NdnPacket *packet)
 {
     if( packet->getArrivalGate()->isName("lowerLayerIn") ){
-        Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(packet->getControlInfo());
-        //IMACProtocolControlInfo *ctrl = check_and_cast<IMACProtocolControlInfo *>(packet->getControlInfo());
+        IMACProtocolControlInfo *ctrl = check_and_cast<IMACProtocolControlInfo *>(packet->getControlInfo());
         packet->removeControlInfo();
         if ( packet->getType() == INTEREST ){
             processLLInterest(check_and_cast<Interest *>(packet), ctrl->getSourceAddress());
@@ -157,7 +117,7 @@ void BF::dispatchPacket(NdnPacket *packet)
     }
 }
 
-void BF::processLLInterest(Interest *interest, MACAddress macSrc)
+void RONR::processLLInterest(Interest *interest, MACAddress macSrc)
 {
     numIntReceived++;
     cout << simTime() << "\t" << getFullPath() << ": << Interest from LL (" << interest->getName() << ")" << endl;
@@ -170,26 +130,30 @@ void BF::processLLInterest(Interest *interest, MACAddress macSrc)
     }
     if( pit->lookup(interest->getName()) == nullptr ){
         cout << simTime() << "\t" << getFullPath() << ": New Interest" << endl;
+        interest->setHopCount(interest->getHopCount() + 1);
         BaseEntry *fe = fib->lookup(interest);
         if ( fe != nullptr ){
-            interest->setHopCount(interest->getHopCount() + 1);
-            forwardInterestToLocal(interest, fe->getFace()->getIndex(), macSrc);
+            if ( fe->getFace()->isName("lowerLayerIn") && forwarding ){
+                forwardInterestToRemote(interest, fe->getFace()->getIndex(), macSrc, fe->getMacDest());
+                numIntFwd++;
+            }
+            else if ( fe->getFace()->isName("upperLayerIn") ){
+                forwardInterestToLocal(interest, fe->getFace()->getIndex(), macSrc);
+            }
+            else
+                delete interest;
         }
-        else if ( forwarding ){
-            cout << simTime() << "\t" << getFullPath() << ": Blind flooding" << endl;
-            interest->setHopCount(interest->getHopCount() + 1);
-            if( waiting )
-                delete sendDelayedPacket->getDelayedPacket();
-            sendDelayedPacket->setDelayedPacket(interest);
-            sendDelayedPacket->setType(INTEREST);
-            sendDelayedPacket->setFace(DEFAULT_MAC_IF);
-            sendDelayedPacket->setMacDest("ff:ff:ff:ff:ff:ff");
-            sendDelayedPacket->setMacSrc(macSrc.str().c_str());
-            scheduleAt(simTime() + SimTime(computeInterestRandomDelay(),SIMTIME_MS), sendDelayedPacket);
-            waiting = true;
+        else{
+            if ( interest->getFlood() && forwarding ){
+                cout << simTime() << "\t" << getFullPath() << ": Delayed forwarding (flooding flag)" << endl;
+                forwardInterestToRemote(interest, DEFAULT_MAC_IF, macSrc, MACAddress("ff:ff:ff:ff:ff:ff"));
+                numIntFwd++;
+            }
+            else{
+                cout << simTime() << "\t" << getFullPath() << ": No forwarding (no flooding flag)" << endl;
+                delete interest;
+            }
         }
-        else
-            delete interest;
     }
     else{
         cout << simTime() << "\t" << getFullPath() << ": Interest already in PIT" << endl;
@@ -198,27 +162,21 @@ void BF::processLLInterest(Interest *interest, MACAddress macSrc)
     }
 }
 
-void BF::processLLData(Data *data, MACAddress macSrc)
+void RONR::processLLData(Data *data, MACAddress macSrc)
 {
     cout << simTime() << "\t" << getFullPath() << ": << Data from LL (" << data->getName() << ")" << endl;
     IPit::PitEntry *pe = pit->lookup(data->getName());
     if ( pe != nullptr ){
         cout << simTime() << "\t" << getFullPath() << ": Solicited Data" << endl;
+        data->setHopCount(data->getHopCount()+1);
         numDataReceived++;
+        fib->create(data->getName(), data->getPrefixLength(), data->getArrivalGate(), macSrc);
         if ( pe->getFace()->isName("lowerLayerIn") && forwarding ){
             cout << simTime() << "\t" << getFullPath() << ": Delay forward Data through NetDeviceFace" << endl;
-            data->setHopCount(data->getHopCount()+1);
-            if( waiting )
-                delete sendDelayedPacket->getDelayedPacket();
-            sendDelayedPacket->setDelayedPacket(data);
-            sendDelayedPacket->setType(DATA);
-            sendDelayedPacket->setFace(pe->getFace()->getIndex());
-            sendDelayedPacket->setMacDest(pe->getMacSrc().str().c_str());
-            scheduleAt(simTime() + SimTime(computeDataRandomDelay(),SIMTIME_MS), sendDelayedPacket);
-            waiting = true;
+            forwardDataToRemote(data, pe->getFace()->getIndex(), pe->getMacSrc());
+            numDataFwd++;
         }
         else if ( pe->getFace()->isName("upperLayerIn") ){
-            data->setHopCount(data->getHopCount()+1);
             forwardDataToLocal(data, pe->getFace()->getIndex());
         }
         pit->remove(data->getName());
@@ -233,7 +191,7 @@ void BF::processLLData(Data *data, MACAddress macSrc)
     }
 }
 
-void BF::processHLInterest(Interest *interest)
+void RONR::processHLInterest(Interest *interest)
 {
     cout << simTime() << "\t" << getFullPath() << ": << HL Interest (" << interest->getName() << ")" << endl;
     Data* cachedData = cs->lookup(interest);
@@ -247,7 +205,12 @@ void BF::processHLInterest(Interest *interest)
         cout << simTime() << "\t" << getFullPath() << ": New Interest" << endl;
         BaseEntry *fe = fib->lookup(interest);
         if ( fe != nullptr ){
-            forwardInterestToLocal(interest, fe->getFace()->getIndex(), myMacAddress);
+            if ( fe->getFace()->isName("lowerLayerIn") ){
+                forwardInterestToRemote(interest, fe->getFace()->getIndex(), myMacAddress, fe->getMacDest());
+            }
+            else if ( fe->getFace()->isName("upperLayerIn") ){
+                forwardInterestToLocal(interest, fe->getFace()->getIndex(), myMacAddress);
+            }
         }
         else{
             forwardInterestToRemote(interest, DEFAULT_MAC_IF, myMacAddress, MACAddress("ff:ff:ff:ff:ff:ff"));
@@ -260,7 +223,7 @@ void BF::processHLInterest(Interest *interest)
     }
 }
 
-void BF::processHLData(Data *data)
+void RONR::processHLData(Data *data)
 {
     IPit::PitEntry *pe = pit->lookup(data->getName());
     cout << simTime() << "\t" << getFullPath() << ": << Data from UL (" << data->getName() << ")" << endl;
@@ -283,16 +246,17 @@ void BF::processHLData(Data *data)
     }
 }
 
-void BF::forwardInterestToRemote(Interest* interest, int face, MACAddress macSrc, MACAddress macDest)
+void RONR::forwardInterestToRemote(Interest* interest, int face, MACAddress macSrc, MACAddress macDest)
 {
     if ( pit->create(interest, macSrc) ){
         cout << simTime() << "\t" << getFullPath() << ": Send Interest through NetDeviceFace (" << interest->getName() << ")" << endl;
         ndnToMacMapping(interest, macDest);
         send(interest, "lowerLayerOut", face);
-    }
+    }else
+        delete interest;
 }
 
-void BF::forwardDataToRemote(Data* data, int face, MACAddress macDest)
+void RONR::forwardDataToRemote(Data* data, int face, MACAddress macDest)
 {
     cout << simTime() << "\t" << getFullPath() << ": Send Data through NetDeviceFace (" << data->getName() << ")" << endl;
     ndnToMacMapping(data, macDest);
@@ -300,22 +264,24 @@ void BF::forwardDataToRemote(Data* data, int face, MACAddress macDest)
 }
 
 
-void BF::forwardInterestToLocal(Interest* interest, int face, MACAddress macSrc)
+void RONR::forwardInterestToLocal(Interest* interest, int face, MACAddress macSrc)
 {
     if ( pit->create(interest, macSrc) ){
         cout << simTime() << "\t" << getFullPath() << ": Send Interest to AppFace (" << interest->getName() << ")" << endl;
         send(interest, "upperLayerOut", face);
     }
+    else
+        delete interest;
 }
 
-void BF::forwardDataToLocal(Data* data, int face)
+void RONR::forwardDataToLocal(Data* data, int face)
 {
     cout << simTime() << "\t" << getFullPath() << ": Send Data to AppFace (" << data->getName() << ")" << endl;
     send(data, "upperLayerOut", face);
 }
 
 
-void BF::ndnToMacMapping(NdnPacket *ndnPacket, MACAddress macDest)
+void RONR::ndnToMacMapping(NdnPacket *ndnPacket, MACAddress macDest)
 {
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     //IMACProtocolControlInfo *controlInfo = new SimpleLinkLayerControlInfo();
@@ -336,36 +302,24 @@ void BF::ndnToMacMapping(NdnPacket *ndnPacket, MACAddress macDest)
     ndnPacket->setControlInfo(check_and_cast<cObject *>(controlInfo));
 }
 
-double BF::computeInterestRandomDelay()
-{
-    return (DW + uniform(0,DW)) * DEFER_SLOT_TIME;
-}
-
-double BF::computeDataRandomDelay()
-{
-    return uniform(0,DW-1) * DEFER_SLOT_TIME;
-}
-
-void BF::refreshDisplay() const
+void RONR::refreshDisplay() const
 {
     char buf[40];
     sprintf(buf, "rcvd: %d D\nfwd: %d I", numDataReceived, numIntFwd);
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void BF::finish()
+void RONR::finish()
 {
     recordScalar("numIntRcvd", numIntReceived);
     recordScalar("numIntFwd", numIntFwd);
-    recordScalar("numIntCanceled", numIntCanceled);
     recordScalar("numIntDuplicated", numIntDuplicated);
     recordScalar("numDataReceived", numDataReceived);
     recordScalar("numDataFwd", numDataFwd);
-    recordScalar("numDataCanceled", numDataCanceled);
     recordScalar("numDataUnsolicited", numDataUnsolicited);
 }
 
-void BF::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void RONR::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
 
@@ -385,7 +339,7 @@ void BF::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, c
     }
 }
 
-bool BF::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool RONR::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     return true;

@@ -20,7 +20,7 @@ package inet.linklayer.ieee802154;
 
 import inet.linklayer.csma.CSMA;
 
-simple Ieee802154NarrowbandMac extends CSMA
+simple PCSMA extends CSMA
 {
     parameters:
         useMACAcks = default(true);
@@ -57,4 +57,6 @@ simple Ieee802154NarrowbandMac extends CSMA
         // Maximum backoff exponent
         // 802.15.4-2006, page 163
         macMaxBE = default(5);
+        
+		@class(PCSMA);
 }

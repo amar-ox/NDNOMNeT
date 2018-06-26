@@ -28,11 +28,12 @@ namespace inet;
 class MACFrameBase;
 
 //
-// A CSMA mac packet format definition
+// A Prioirity-based CSMA mac packet format definition
 //
-// @author Daniel Willkomm
+// @author Amar Abane
 //
-packet CSMAFrame extends MACFrameBase
+packet PCSMAFrame extends MACFrameBase
 {
-    long       sequenceId; // Sequence Number to detect duplicate messages  
+    long       sequenceId; // Sequence Number to detect duplicate messages       
+    float     priority;    
 }

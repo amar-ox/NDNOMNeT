@@ -106,7 +106,8 @@ Interest* ConsumerAppBase::createNextInterest()
     interest->setNonce(2,intuniform(0,255));
     interest->setNonce(3,intuniform(0,255));
 
-    interest->setByteLength(Tools::computeTlvPacketSize(interest));
+    int iLength = interestLength ? interestLength : Tools::computeTlvPacketSize(interest);
+    interest->setByteLength(iLength);
 
     firstSendTimeHistory[intSeqNo % HISTORY_SIZE] = simTime();
     lastSendTimeHistory[intSeqNo % HISTORY_SIZE] = simTime();
@@ -172,7 +173,6 @@ void ConsumerAppBase::onTimeout(Interest *interest)
         interest->setFlood(true);
         sendDelayed(interest, SimTime(uniform(1,2), SIMTIME_MS), "consumerOut");
         cout << simTime() << "\t" << getFullPath() << ": >> ReTx Interest (" << interest->getName() << ")" << endl;
-        //numIntSent++;
     }
     else{
         numUnsatisfied++;

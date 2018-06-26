@@ -83,7 +83,8 @@ void ProducerAppBase::processInterest(NdnPacket *packet)
            data->setType(6);
            data->setHopCount(0);
            data->setFreshnessPeriod(dataFreshness);
-           data->setByteLength(Tools::computeTlvPacketSize(data));
+           int dLength = dataLength ? dataLength : Tools::computeTlvPacketSize(data);
+           data->setByteLength(dLength);
            sendDelayed(data, SimTime(1.5, SIMTIME_MS), "producerOut");
            cout << simTime() << "\t" << getFullPath() << ": >> Data (" << data->getName() << ")" << endl;
            numDataSent++;

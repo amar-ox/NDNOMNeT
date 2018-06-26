@@ -16,8 +16,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __NDN_ILNFS_H
-#define __NDN_ILNFS_H
+#ifndef __NDN_BF_H
+#define __NDN_BF_H
 
 #include <vector>
 #include <string>
@@ -36,28 +36,21 @@
 #include "inet/networklayer/contract/ndn/ICs.h"
 #include "inet/networklayer/contract/ndn/IForwarding.h"
 
-#include "PitBase.h"
-#include "FibBase.h"
-#include "FibIlnfs.h"
-#include "CsBase.h"
-#include "Xu.h"
-#include "packets/NdnPackets_m.h"
-#include "packets/Tools.h"
+#include "inet/networklayer/ndn/PitBase.h"
+#include "inet/networklayer/ndn/FibBase.h"
+#include "inet/networklayer/ndn/CsBase.h"
+#include "inet/networklayer/ndn/packets/NdnPackets_m.h"
+#include "inet/networklayer/ndn/packets/Tools.h"
 
 #define DW 255
 #define DEFER_SLOT_TIME 0.028
+#define HISTORY_SIZE 10
 #define TIMEOUT_CODE 100
 #define REGISTER_PREFIX_CODE 15
 #define DEFAULT_MAC_IF 0
 
-#define M 9.
-#define N 3.5
-#define DELTA_MAX 4.
-#define TH 0.8
-#define ALPHA 0.85
-
 namespace inet {
-class INET_API ILNFS : public cSimpleModule, public IForwarding, public ILifecycle, protected cListener
+class INET_API BF : public cSimpleModule, public IForwarding, public ILifecycle, protected cListener
 {
 protected:
     SendDelayed* sendDelayedPacket = new SendDelayed("ft");
@@ -70,7 +63,7 @@ protected:
 
     /* NDN tables */
     PitBase *pit;
-    FibIlnfs *fib;
+    FibBase *fib;
     CsBase *cs;
 
     /* router stat */
@@ -82,10 +75,6 @@ protected:
     int numDataReceived = 0;
     int numDataUnsolicited = 0;
     int numDataFwd = 0;
-
-    /* delay adjustment */
-    int neighborI = 0;
-    int neighborD = 0;
 
     /* Omnet stuff */
     virtual void initialize(int stage) override;
@@ -134,24 +123,19 @@ protected:
     /* */
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    /* */
+    /**
+     * ILifecycle method
+     */
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
-
     /* */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
-    /* */
-    virtual float computeTheta();
-
-    /* */
-    virtual float computeDelay(float delta);
-
   public:
-    ILNFS();
-    virtual ~ILNFS();
+    BF();
+    virtual ~BF();
 };
 
 } // namespace inet
 
-#endif
+#endif // ifndef __NDN_FORWARDING_H
 

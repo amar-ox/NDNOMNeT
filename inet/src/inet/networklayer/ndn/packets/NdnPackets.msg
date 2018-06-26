@@ -30,6 +30,7 @@ packet NdnPacket
     short prefixLength = 1;		// for help :)
     bool flood = false;  
     float cost = 0;
+    float priority = 1;
 };
 
 

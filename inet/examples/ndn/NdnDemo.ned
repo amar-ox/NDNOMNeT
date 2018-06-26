@@ -26,6 +26,7 @@ network NdnDemo
     parameters:
         int numRouters;
         int numProducers;
+        int numConsumers;
         @display("bgb=100,100;bgg=100,1,grey95");
     submodules:
         radioMedium: IdealRadioMedium {
@@ -41,7 +42,7 @@ network NdnDemo
                 @display("p=0,0");
         }
 
-        ndnCons: NdnWirelessHost {
+        ndnCons[numConsumers]: NdnWirelessHost {
             parameters:
                 @display("p=49.92,17.333334");
         }

@@ -20,12 +20,14 @@ package inet.linklayer.ieee802154;
 
 import inet.linklayer.contract.IWirelessNic;
 import inet.physicallayer.contract.packetlevel.IRadio;
+import inet.linklayer.contract.IMACProtocol;
 
 module Ieee802154NarrowbandNic like IWirelessNic
 {
     parameters:
         string interfaceTableModule;
         string radioType = default("Ieee802154NarrowbandScalarRadio");
+        string macType = default("Ieee802154NarrowbandMac");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/ifcard");
     gates:
@@ -33,7 +35,11 @@ module Ieee802154NarrowbandNic like IWirelessNic
         output upperLayerOut;
         input radioIn @labels(IRadioFrame);
     submodules:
-        mac: Ieee802154NarrowbandMac {
+        //mac: Ieee802154NarrowbandMac {
+        //    parameters:
+        //        @display("p=100,150");
+        //}
+        mac: <macType> like IMACProtocol {
             parameters:
                 @display("p=100,150");
         }

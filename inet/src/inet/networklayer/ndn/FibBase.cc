@@ -199,4 +199,19 @@ void FibBase::print()
     cout << endl;
 }
 
+bool FibBase::setToBroadcast(const char* name)
+{
+    Enter_Method("setToBroadcast(...)");
+    if ( entries.empty() )
+        return false;
+    for (unsigned i = 0; i < entries.size(); i++){
+        size_t prefixLength = entries.at(i)->getPrefix().length();
+        if ( ! strncmp(entries.at(i)->getPrefix().c_str(), name, prefixLength) ){
+            entries.at(i)->setMacDest(MACAddress("ff:ff:ff:ff:ff:ff"));
+            return true;
+        }
+    }
+    return false;
+}
+
 } //namespace

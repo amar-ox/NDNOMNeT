@@ -55,6 +55,9 @@ public:
     virtual void cleanExpired() override;
 
     /* */
+    virtual bool setToBroadcast(const char* name);
+
+    /* */
     virtual void refreshDisplay() const override;
 
     /* */

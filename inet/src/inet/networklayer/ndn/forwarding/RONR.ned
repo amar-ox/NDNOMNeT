@@ -16,12 +16,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.networklayer.ndn;
+package inet.networklayer.ndn.forwarding;
 
-//import inet.networklayer.contract.INetworkProtocol;
 import inet.networklayer.contract.ndn.IForwarding;
 
-simple ForwardingBase like IForwarding
+simple RONR like IForwarding
 {
     parameters:
         string interfaceTableModule;

@@ -16,8 +16,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __NDN_FORWARDING_BASE_H
-#define __NDN_FORWARDING_BASE_H
+#ifndef __NDN_DYNAMIC_MAPPING_H
+#define __NDN_DYNAMIC_MAPPING_H
 
 #include <vector>
 #include <string>
@@ -36,23 +36,23 @@
 #include "inet/networklayer/contract/ndn/ICs.h"
 #include "inet/networklayer/contract/ndn/IForwarding.h"
 
-#include "PitBase.h"
-#include "FibBase.h"
-#include "FibIlnfs.h"
-#include "CsBase.h"
-#include "Xu.h"
-#include "packets/NdnPackets_m.h"
-#include "packets/Tools.h"
+#include "inet/networklayer/ndn/PitBase.h"
+#include "inet/networklayer/ndn/FibBase.h"
+#include "inet/networklayer/ndn/CsBase.h"
+#include "inet/networklayer/ndn/Xu.h"
+#include "inet/networklayer/ndn/packets/NdnPackets_m.h"
+#include "inet/networklayer/ndn/packets/Tools.h"
 
-#define DW 127
+#define DW 255
 #define DEFER_SLOT_TIME 0.028
 #define HISTORY_SIZE 10
 #define TIMEOUT_CODE 100
 #define REGISTER_PREFIX_CODE 15
 #define DEFAULT_MAC_IF 0
+#define CHECK_PREFIX_CODE 111
 
 namespace inet {
-class INET_API ForwardingBase : public cSimpleModule, public IForwarding, public ILifecycle, protected cListener
+class INET_API DynamicMapping : public cSimpleModule, public IForwarding, public ILifecycle, protected cListener
 {
 protected:
     SendDelayed* sendDelayedPacket = new SendDelayed("ft");
@@ -123,6 +123,9 @@ protected:
     virtual double computeDataRandomDelay();
 
     /* */
+    virtual void checkPrefix(const char* prefix);
+
+    /* */
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /**
@@ -133,11 +136,11 @@ protected:
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
   public:
-    ForwardingBase();
-    virtual ~ForwardingBase();
+    DynamicMapping();
+    virtual ~DynamicMapping();
 };
 
 } // namespace inet
 
-#endif // ifndef __NDN_FORWARDING_H
+#endif
 
