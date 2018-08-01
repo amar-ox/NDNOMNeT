@@ -31,7 +31,7 @@ FibIlnfs::FibIlnfs()
 
 FibIlnfs::~FibIlnfs()
 {
-    cancelAndDelete(checkExpired);
+    //cancelAndDelete(checkExpired);
     entries.erase(entries.begin(), entries.end());
 }
 
@@ -44,11 +44,11 @@ void FibIlnfs::initialize()
 
 void FibIlnfs::handleMessage(cMessage *msg)
 {
-    if ( msg->isSelfMessage() ){
-        cleanExpired();
-        if (entries.size())
-            scheduleAt(simTime() + SimTime(1000, SIMTIME_MS), checkExpired);
-    }else
+    //if ( msg->isSelfMessage() ){
+        //cleanExpired();
+        //if (entries.size())
+        //    scheduleAt(simTime() + SimTime(1000, SIMTIME_MS), checkExpired);
+    //}else
         delete msg;
 }
 
@@ -107,8 +107,8 @@ bool FibIlnfs::create(const char* name, short length, cGate* face, MACAddress de
     IlnfsEntry *e = new IlnfsEntry(prefix, face, dest, entryLifetime, mhc, a);
     entries.push_back(e);
     numAdded++;
-    if (! checkExpired->isScheduled())
-        scheduleAt(simTime() + SimTime(1000, SIMTIME_MS), checkExpired);
+    //if (! checkExpired->isScheduled())
+    //    scheduleAt(simTime() + SimTime(1000, SIMTIME_MS), checkExpired);
     return true;
 }
 
@@ -218,8 +218,8 @@ float FibIlnfs::updateCost(const char* name, short length, cGate* face, MACAddre
     IlnfsEntry *e = new IlnfsEntry(prefix, face, dest, entryLifetime, c, a);
     entries.push_back(e);
     numAdded++;
-    if (! checkExpired->isScheduled())
-        scheduleAt(simTime() + SimTime(1000, SIMTIME_MS), checkExpired);
+    //if (! checkExpired->isScheduled())
+    //    scheduleAt(simTime() + SimTime(1000, SIMTIME_MS), checkExpired);
     return e->getCost();
 }
 

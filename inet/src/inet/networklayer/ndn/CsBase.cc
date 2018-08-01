@@ -82,6 +82,7 @@ Data* CsBase::lookup(Interest* interest)
     return nullptr;
 }
 
+/* very simple caching algorithm */
 bool CsBase::add(Data* data)
 {
     Enter_Method("add(...)");
@@ -101,7 +102,25 @@ bool CsBase::add(Data* data)
             return true;
         }
     }
-    if ( entries.size() == maxSize ){
+    if (entries.size() < maxSize){
+        cout << simTime() << "\t" << getFullPath() << ": Add new Data (" << data->getName() << ")" << endl;
+        CsEntry *e = new CsEntry(data->dup());
+        entries.push_back(e);
+        if (! checkDataStale->isScheduled())
+            scheduleAt(simTime() + SimTime(1000, SIMTIME_MS), checkDataStale);
+        numAdded++;
+        return true;
+    }
+
+    for (it = entries.begin(); it != entries.end(); ++it){
+        if (!(*it)->getFresh()){
+            cout << simTime() << "\t" << getFullPath() << ": Replace stale Data (" << (*it)->getData()->getName() << ")" << endl;
+            delete (*it)->getData();
+            entries.erase(it);
+            break;
+        }
+    }
+    if (entries.size() == maxSize){
         delete entries[0]->getData();
         entries.erase(entries.begin());
     }

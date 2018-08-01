@@ -236,6 +236,7 @@ void PCSMA::handleUpperPacket(cPacket *msg)
     /* NDN */
     NdnPacket *ndnPacket = static_cast<NdnPacket *>(msg);
     macPkt->setPriority(ndnPacket->getPriority());
+    macPkt->setCost(ndnPacket->getEligibility());
     /*-----*/
 
     EV_DETAIL << "pkt encapsulated, length: " << macPkt->getBitLength() << "\n";
@@ -390,9 +391,11 @@ void PCSMA::updateStatusCCA(t_mac_event event, cMessage *msg)
         case EV_TIMER_CCA: {
             EV_DETAIL << "(25) FSM State CCA_3, EV_TIMER_CCA" << endl;
             bool isIdle = radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE;
+
+            PCSMAFrame *mac = check_and_cast<PCSMAFrame *>(macQueue.front()->dup());
+            int priority = mac->getPriority();
             if (isIdle) {
-                PCSMAFrame *mac = check_and_cast<PCSMAFrame *>(macQueue.front()->dup());
-                if ( mac->getPriority() > uniform(0, 1, 0) ){
+                //if ( !(priority % 2) || (mac->getCost() >= normal(NORMAL_MEAN, NORMAL_SD)) ){
                     EV_DETAIL << "(3) FSM State CCA_3, EV_TIMER_CCA, [Channel Idle]: -> TRANSMITFRAME_4." << endl;
                     updateMacState(TRANSMITFRAME_4);
                     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
@@ -400,31 +403,35 @@ void PCSMA::updateStatusCCA(t_mac_event event, cMessage *msg)
                     // give time for the radio to be in Tx state before transmitting
                     sendDelayed(mac, aTurnaroundTime, lowerLayerOutGateId);
                     nbTxFrames++;
-                    return;
-                }
-                delete mac;
+                //}else
+                //    delete mac;
             }
-            // Channel was busy, increment 802.15.4 backoff timers as specified.
-            EV_DETAIL << "(7) FSM State CCA_3, EV_TIMER_CCA, [Channel Busy]: "
+            else{
+                delete mac;
+                // Channel was busy, increment 802.15.4 backoff timers as specified.
+                EV_DETAIL << "(7) FSM State CCA_3, EV_TIMER_CCA, [Channel Busy]: "
                     << " increment counters." << endl;
-            NB = NB + 1;
-            // decide if we go for another backoff or if we drop the frame.
-            if (NB > macMaxCSMABackoffs) {
-                // drop the frame
-                EV_DETAIL << "Tried " << NB << " backoffs, all reported a busy "
+                //NB = NB + 1;
+                NB = NB + priority + 1;
+
+                // decide if we go for another backoff or if we drop the frame.
+                if (NB > macMaxCSMABackoffs) {
+                    // drop the frame
+                    EV_DETAIL << "Tried " << NB << " backoffs, all reported a busy "
                         << "channel. Dropping the packet." << endl;
-                cMessage *mac = macQueue.front();
-                macQueue.pop_front();
-                txAttempts = 0;
-                nbDroppedFrames++;
-                emit(packetFromUpperDroppedSignal, mac);
-                delete mac;
-                manageQueue();
-            }
-            else {
-                // redo backoff
-                updateMacState(BACKOFF_2);
-                startTimer(TIMER_BACKOFF);
+                    cMessage *mac = macQueue.front();
+                    macQueue.pop_front();
+                    txAttempts = 0;
+                    nbDroppedFrames++;
+                    emit(packetFromUpperDroppedSignal, mac);
+                    delete mac;
+                    manageQueue();
+                }
+                else {
+                    // redo backoff
+                    updateMacState(BACKOFF_2);
+                    startTimer(TIMER_BACKOFF);
+                }
             }
             break;
         }

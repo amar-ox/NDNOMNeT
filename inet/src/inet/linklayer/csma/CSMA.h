@@ -290,6 +290,9 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
     /** @brief The bit length of the ACK packet.*/
     int ackLength;
 
+    /* for R-LF (amar)*/
+    bool promiscuous;
+
   protected:
     /** @brief Generate new interface address*/
     virtual void initializeMACAddress();

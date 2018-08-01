@@ -46,6 +46,7 @@ void ConsumerAppBase::initialize(int stage)
         interestLifetime = par("interestLifetime");
         sendIntervalPar = &par("sendInterval");
 
+        lastRttVector.setName("RTT");
         WATCH(numIntSent);
         WATCH(numDataReceived);
     }
@@ -80,17 +81,16 @@ void ConsumerAppBase::handleMessage(cMessage *msg)
 Interest* ConsumerAppBase::createNextInterest()
 {
     std::string interestName(cPrefix, strlen(cPrefix));
-    std::string l1_comp(std::to_string(intuniform(0,NUM_L1_COMPONENT)+1));
+    //interestName+="/";
+    //interestName+=std::to_string(intuniform(0,NUM_L1_COMPONENT)+1);
     interestName+="/";
-    interestName+=l1_comp;
-    interestName+="/";
-    interestName+=std::to_string(intuniform(0,NUM_L2_COMPONENT));
+    interestName+=std::to_string((int)normal(5,2));
 
     Interest *interest = new Interest(interestName.c_str());
 
     // set simulation fields
     interest->setType(5);
-    interest->setPrefixLength(strlen(cPrefix)+l1_comp.length()+1);
+    interest->setPrefixLength(strlen(cPrefix));
     interest->setKind(0);
     interest->setHopCount(0);
     interest->setSeqNo(intSeqNo);
@@ -119,16 +119,20 @@ Interest* ConsumerAppBase::createNextInterest()
 void ConsumerAppBase::onData(Data *data)
 {
     cout << getFullPath() << ":" << endl;
-    Tools::printPacket(data);
+    //Tools::printPacket(data);
     simtime_t allRtt = intSeqNo - data->getSeqNo() > HISTORY_SIZE ?
             0 : simTime() - firstSendTimeHistory[data->getSeqNo() % HISTORY_SIZE];
     simtime_t lastRtt = intSeqNo - data->getSeqNo() > HISTORY_SIZE ?
             0 : simTime() - lastSendTimeHistory[data->getSeqNo() % HISTORY_SIZE];
     short numRetx  = intSeqNo - data->getSeqNo() > HISTORY_SIZE ? 0 : numRetxHistory[data->getSeqNo() % HISTORY_SIZE];
-    allRttStat.collect(allRtt * 1000);
-    lastRttStat.collect(lastRtt * 1000);
-    retxStat.collect(numRetx);
-    hopCountStat.collect(data->getHopCount());
+
+    if ((lastRtt > 0) && (lastRtt <= 2)){
+        allRttStat.collect(allRtt * 1000);
+        lastRttStat.collect(lastRtt * 1000);
+        lastRttVector.record(lastRtt * 1000);
+        retxStat.collect(numRetx);
+        hopCountStat.collect(data->getHopCount());
+    }
     numDataReceived++;
     delete data;
 }

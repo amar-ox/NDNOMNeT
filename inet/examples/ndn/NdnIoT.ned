@@ -16,7 +16,9 @@
 package inet.examples.ndn;
 
 import inet.physicallayer.idealradio.IdealRadioMedium;
+import inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandScalarRadioMedium;
 import inet.node.ndn.NdnWirelessHost;
+import inet.node.ndn.NdnWirelessHostBase;
 
 
 // NDN over IEEE802.15.4 in IoT network
@@ -26,24 +28,24 @@ network NdnIoT
         int numRouters;
         int numProducers;
         int numConsumers;
-        @display("bgb=260,260;bgg=100,1,grey95");
+        @display("bgb=180,180;bgg=100,1,grey95");
     submodules:
         radioMedium: IdealRadioMedium {
             @display("p=649,75");
         }
-        ndnP : NdnWirelessHost {
+        ndnP[numProducers] : NdnWirelessHost {
             parameters:
-                @display("p=130,130");
+                @display("p=90,90");
         }
                 
-        ndnR[numRouters]: NdnWirelessHost {
+        ndnR[numRouters]: NdnWirelessHostBase {
             parameters:
                 @display("p=0,0");
         }
               
         ndnC[numConsumers] : NdnWirelessHost {
             parameters:
-                @display("p=250,55");
+                @display("p=90,90");
         } 
 }
 

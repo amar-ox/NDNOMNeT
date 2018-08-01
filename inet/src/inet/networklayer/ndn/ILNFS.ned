@@ -32,6 +32,7 @@ simple ILNFS like IForwarding
         int ndnMacMapping = default(11);
         bool forwarding;
         bool cacheUnsolicited = default(false);
+        bool delays = default(true);
         @display("i=block/switch");
     gates:
         input upperLayerIn[];

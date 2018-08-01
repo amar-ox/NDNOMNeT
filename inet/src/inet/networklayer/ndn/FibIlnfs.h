@@ -37,24 +37,22 @@ public:
     : BaseEntry(prefix, face, dest, entryLifetime), minHeardCost(mhc)
     {
         cost = 0.;
-        cost = (1. - a) * cost + a * (1 + mhc);
+        cost = (float)(1. - (float)a) * (float)cost + (float)a * (float)(1. + (float)mhc);
     }
 
     float getCost() { return cost; }
     void resetCost(float max_delta)
     {
         minHeardCost = max_delta;
-        cost = 0;
+        cost = 0.;
     }
     void updateCost(float c, float a, MACAddress dest)
     {
         if ( c < minHeardCost ){
             minHeardCost = c;
-            cost = (1. - a) * cost + a * (1 + minHeardCost);
+            cost = (float)(1. - (float)a) * cost + (float)a * (float)(1. + (float)minHeardCost);
             macDest = dest;
         }
-        else if ( c == minHeardCost )
-            minHeardCost = c;
     }
 
 private:
@@ -104,7 +102,7 @@ public:
 
 private:
     std::vector<IlnfsEntry *> entries;
-    cMessage *checkExpired = new cMessage("pe");
+    //cMessage *checkExpired = new cMessage("pe");
     unsigned maxSize;
     int entryLifetime;
     int numAdded = 0;

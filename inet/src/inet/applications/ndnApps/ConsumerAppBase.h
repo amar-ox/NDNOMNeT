@@ -68,6 +68,7 @@ protected:
     cLongHistogram lastRttStat;
     cLongHistogram retxStat;
     cLongHistogram hopCountStat;
+    cOutVector lastRttVector;
     int numIntSent = 0;
     int numDataReceived = 0;
     int numUnsatisfied = 0;

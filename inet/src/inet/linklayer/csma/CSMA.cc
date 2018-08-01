@@ -69,6 +69,9 @@ void CSMA::initialize(int stage)
         ackLength = par("ackLength");
         ackMessage = nullptr;
 
+        /* for R-LF (amar) */
+        promiscuous = par("promiscuous");
+
         //init parameters for backoff method
         std::string backoffMethodStr = par("backoffMethod").stdstringValue();
         if (backoffMethodStr == "exponential") {
@@ -916,6 +919,11 @@ void CSMA::handleLowerPacket(cPacket *msg)
     else if (dest.isBroadcast()) {
         executeMac(EV_BROADCAST_RECEIVED, macPkt);
     }
+    /* for R-LF (amar) */
+    else if (promiscuous){
+        executeMac(EV_BROADCAST_RECEIVED, macPkt);
+    }
+    /*------*/
     else {
         EV_DETAIL << "packet not for me, deleting...\n";
         delete macPkt;

@@ -123,8 +123,10 @@ void RONR::processLLInterest(Interest *interest, MACAddress macSrc)
     cout << simTime() << "\t" << getFullPath() << ": << Interest from LL (" << interest->getName() << ")" << endl;
     Data* cachedData = cs->lookup(interest);
     if ( cachedData != nullptr ){
-        cout << simTime() << "\t" << getFullPath() << ": << Cached Data found (" << interest->getName() << ")" << endl;
-        forwardDataToRemote(cachedData->dup(), interest->getArrivalGate()->getIndex(), macSrc);
+        Data* data = cachedData->dup();
+        data->setHopCount(0);
+        data->setSeqNo(interest->getSeqNo());
+        forwardDataToRemote(data, interest->getArrivalGate()->getIndex(), macSrc);
         delete interest;
         return;
     }
@@ -167,6 +169,7 @@ void RONR::processLLData(Data *data, MACAddress macSrc)
     cout << simTime() << "\t" << getFullPath() << ": << Data from LL (" << data->getName() << ")" << endl;
     IPit::PitEntry *pe = pit->lookup(data->getName());
     if ( pe != nullptr ){
+        int seqNo = pe->getInterest()->getSeqNo();
         cout << simTime() << "\t" << getFullPath() << ": Solicited Data" << endl;
         data->setHopCount(data->getHopCount()+1);
         numDataReceived++;
@@ -177,6 +180,7 @@ void RONR::processLLData(Data *data, MACAddress macSrc)
             numDataFwd++;
         }
         else if ( pe->getFace()->isName("upperLayerIn") ){
+            data->setSeqNo(seqNo);
             forwardDataToLocal(data, pe->getFace()->getIndex());
         }
         pit->remove(data->getName());
@@ -197,7 +201,10 @@ void RONR::processHLInterest(Interest *interest)
     Data* cachedData = cs->lookup(interest);
     if ( cachedData != nullptr ){
         cout << simTime() << "\t" << getFullPath() << ": << Cached Data found (" << interest->getName() << ")" << endl;
-        forwardDataToLocal(cachedData->dup(), interest->getArrivalGate()->getIndex());
+        Data* data = cachedData->dup();
+        data->setHopCount(0);
+        data->setSeqNo(interest->getSeqNo());
+        forwardDataToLocal(data, interest->getArrivalGate()->getIndex());
         delete interest;
         return;
     }

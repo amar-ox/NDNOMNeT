@@ -28,7 +28,7 @@ simple RONR like IForwarding
         string fibModule = default("^.fib");
         string csModule = default("^.cs"); 
         string xuModule = default("^.xu"); 
-        int ndnMacMapping = default(11);
+        int ndnMacMapping = default(14);	// unicast by default
         bool forwarding;
         bool cacheUnsolicited = default(false);
         @display("i=block/switch");

@@ -44,16 +44,18 @@
 #include "packets/NdnPackets_m.h"
 #include "packets/Tools.h"
 
-#define DW 255
-#define DEFER_SLOT_TIME 0.028
+#define DW 127
+#define DEFER_SLOT_TIME 0.032
 #define TIMEOUT_CODE 100
 #define REGISTER_PREFIX_CODE 15
 #define DEFAULT_MAC_IF 0
 
-#define M 9.
-#define N 3.5
-#define DELTA_MAX 4.
-#define TH 0.8
+#define M 5.0          // 9.0
+#define N 3.5        // 3.5
+#define DELTA_MAX 6.
+#define TH 0.75
+#define A_MIN TH-1
+#define A_MAX DELTA_MAX+TH
 #define ALPHA 0.85
 
 namespace inet {
@@ -67,6 +69,7 @@ protected:
     int ndnMacMapping;
     bool forwarding;
     bool cacheUnsolicited;
+    bool delays;
 
     /* NDN tables */
     PitBase *pit;
@@ -82,6 +85,7 @@ protected:
     int numDataReceived = 0;
     int numDataUnsolicited = 0;
     int numDataFwd = 0;
+    cOutVector eligStat;
 
     /* delay adjustment */
     int neighborI = 0;

@@ -156,7 +156,18 @@ void BF::processLLInterest(Interest *interest, MACAddress macSrc)
     Data* cachedData = cs->lookup(interest);
     if ( cachedData != nullptr ){
         cout << simTime() << "\t" << getFullPath() << ": << Cached Data found (" << interest->getName() << ")" << endl;
-        forwardDataToRemote(cachedData->dup(), interest->getArrivalGate()->getIndex(), macSrc);
+        Data* data = cachedData->dup();
+        data->setHopCount(0);
+        data->setSeqNo(interest->getSeqNo());
+        if( waiting )
+            delete sendDelayedPacket->getDelayedPacket();
+        sendDelayedPacket->setDelayedPacket(data);
+        sendDelayedPacket->setType(DATA);
+        sendDelayedPacket->setFace(interest->getArrivalGate()->getIndex());
+        sendDelayedPacket->setMacDest("ff:ff:ff:ff:ff:ff");
+        sendDelayedPacket->setMacSrc(macSrc.str().c_str());
+        scheduleAt(simTime() + SimTime(computeDataRandomDelay(),SIMTIME_MS), sendDelayedPacket);
+        waiting = true;
         delete interest;
         return;
     }
@@ -195,6 +206,7 @@ void BF::processLLData(Data *data, MACAddress macSrc)
     cout << simTime() << "\t" << getFullPath() << ": << Data from LL (" << data->getName() << ")" << endl;
     IPit::PitEntry *pe = pit->lookup(data->getName());
     if ( pe != nullptr ){
+        int seqNo = pe->getInterest()->getSeqNo();
         cout << simTime() << "\t" << getFullPath() << ": Solicited Data" << endl;
         numDataReceived++;
         if ( pe->getFace()->isName("lowerLayerIn") && forwarding ){
@@ -211,6 +223,7 @@ void BF::processLLData(Data *data, MACAddress macSrc)
         }
         else if ( pe->getFace()->isName("upperLayerIn") ){
             data->setHopCount(data->getHopCount()+1);
+            data->setSeqNo(seqNo);
             forwardDataToLocal(data, pe->getFace()->getIndex());
         }
         pit->remove(data->getName());
@@ -231,7 +244,10 @@ void BF::processHLInterest(Interest *interest)
     Data* cachedData = cs->lookup(interest);
     if ( cachedData != nullptr ){
         cout << simTime() << "\t" << getFullPath() << ": << Cached Data found (" << interest->getName() << ")" << endl;
-        forwardDataToLocal(cachedData->dup(), interest->getArrivalGate()->getIndex());
+        Data* data = cachedData->dup();
+        data->setHopCount(0);
+        data->setSeqNo(interest->getSeqNo());
+        forwardDataToLocal(data, interest->getArrivalGate()->getIndex());
         delete interest;
         return;
     }

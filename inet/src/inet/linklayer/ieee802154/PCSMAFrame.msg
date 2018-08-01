@@ -35,5 +35,6 @@ class MACFrameBase;
 packet PCSMAFrame extends MACFrameBase
 {
     long       sequenceId; // Sequence Number to detect duplicate messages       
-    float     priority;    
+    int     priority;
+    double cost;    
 }

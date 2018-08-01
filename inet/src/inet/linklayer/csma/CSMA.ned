@@ -91,6 +91,9 @@ simple CSMA extends MACProtocolBase like IMACProtocol
         double macMaxBE = default(8);
 
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
+        
+        // for R-Lf (amar)
+        bool promiscuous = default(false);        
 
         @class(CSMA);
         @signal[NF_LINK_BREAK](type=CSMAFrame);

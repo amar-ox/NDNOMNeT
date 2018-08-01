@@ -34,6 +34,9 @@
 #include "PCSMAFrame_m.h"
 #include "inet/networklayer/ndn/packets/NdnPackets_m.h"
 
+#define NORMAL_MEAN 1.0  // (A_MAX / 2) ~ 2.5
+#define NORMAL_SD 1.0    // P(X <= A_MIN) ~ 0
+
 namespace inet {
 
 using namespace physicallayer;
