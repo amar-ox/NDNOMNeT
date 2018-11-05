@@ -42,7 +42,7 @@
 #include "inet/networklayer/ndn/packets/NdnPackets_m.h"
 #include "inet/networklayer/ndn/packets/Tools.h"
 
-#define DW 127
+#define DW 255
 #define DEFER_SLOT_TIME 0.032
 #define HISTORY_SIZE 10
 #define TIMEOUT_CODE 100

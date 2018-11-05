@@ -33,8 +33,8 @@
 
 #define HISTORY_SIZE 100
 #define TIMEOUT_CODE 100
-#define NUM_L1_COMPONENT 5 // num content sources
-#define NUM_L2_COMPONENT 30 // num content per source
+#define NUM_L1_COMPONENT 1 // num content sources
+#define NUM_L2_COMPONENT 5 // num data type per source
 
 using namespace omnetpp;
 namespace inet {

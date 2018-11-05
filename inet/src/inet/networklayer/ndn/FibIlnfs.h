@@ -41,11 +41,19 @@ public:
     }
 
     float getCost() { return cost; }
-    void resetCost(float max_delta)
+
+    bool resetCost(float max_delta)
     {
-        minHeardCost = max_delta;
-        cost = 0.;
+        numTimeout+=1;
+        if (numTimeout == 1){
+            minHeardCost = max_delta;
+            cost = 0.;
+            numTimeout = 0;
+            return true;
+        }
+        return false;
     }
+
     void updateCost(float c, float a, MACAddress dest)
     {
         if ( c < minHeardCost ){
@@ -53,11 +61,13 @@ public:
             cost = (float)(1. - (float)a) * cost + (float)a * (float)(1. + (float)minHeardCost);
             macDest = dest;
         }
+        numTimeout = 0;
     }
 
 private:
     float minHeardCost;
     float cost;
+    int numTimeout = 0;
 };
 
 

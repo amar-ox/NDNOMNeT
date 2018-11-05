@@ -26,7 +26,7 @@ network NdnSimple
         @display("bgb=100,100;bgg=100,1,grey95");
     submodules:
         radioMedium: IdealRadioMedium {
-            @display("p=86.666664,12.48");
+            @display("p=81.46667,9.36");
         }
         ndnCons: NdnWirelessHost {
             @display("p=20,20");

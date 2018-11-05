@@ -26,23 +26,23 @@ module NdnWirelessHost extends NdnWirelessHostBase
     parameters:
         @display("i=device/pocketpc_s;bgb=457,425");
         @networkNode;
-        @labels(wireless-NDN-node-application);  
+        @labels(wireless-NDN-node-application);
         int numConsumerApps = default(0);
         int numProducerApps = default(0);
         bool hasConsumer = default(numConsumerApps > 0);
         bool hasProducer = default(numProducerApps > 0);
-        forwarding = default(false);          
+        forwarding = default(false);
 
     submodules:
         consumer[numConsumerApps]: ConsumerAppBase {
-            @display("p=338,53");
+            @display("p=338,31");
         }
 
         producer[numProducerApps]: ProducerAppBase {
-            @display("p=111,53");
+            @display("p=112,31");
         }
-                
-    connections allowunconnected:        
+
+    connections allowunconnected:
         for i=0..numConsumerApps-1 {
             ndnL3.transportIn++ <-- consumer[i].consumerOut;
             ndnL3.transportOut++ --> consumer[i].consumerIn;

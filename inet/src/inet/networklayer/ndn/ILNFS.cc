@@ -39,6 +39,7 @@ ILNFS::~ILNFS()
     if (waiting)
         delete sendDelayedPacket->getDelayedPacket();
     cancelAndDelete(sendDelayedPacket);
+    cancelAndDelete(resetStatTimer);
 }
 
 void ILNFS::initialize(int stage)
@@ -49,6 +50,10 @@ void ILNFS::initialize(int stage)
         pit = getModuleFromPar<PitBase>(par("pitModule"), this);
         fib = getModuleFromPar<FibIlnfs>(par("fibModule"), this);
         cs = getModuleFromPar<CsBase>(par("csModule"), this);
+
+        cModule *macModule = getModuleByPath("^.^.wlan[0].mac");
+        //cModule *macModule = check_and_cast<cModule *>(mac);
+        macModule->subscribe(LayeredProtocolBase::packetFromUpperDroppedSignal, this);
 
         cModule *pitModule = check_and_cast<cModule *>(pit);
         pitModule->subscribe(PitBase::interestTimeoutSignal, this);
@@ -66,7 +71,8 @@ void ILNFS::initialize(int stage)
         forwarding = par("forwarding");
         cacheUnsolicited = par("cacheUnsolicited");
 
-        eligStat.setName("delta");
+        deltaStat.setName("delta");
+        nsStat.setName("Na");
         WATCH(numIntReceived);
         WATCH(numIntFwd);
         WATCH(numIntCanceled);
@@ -83,6 +89,8 @@ void ILNFS::initialize(int stage)
                 break;
         }
         cout << getFullPath() << ": MAC address: " << myMacAddress.str().c_str() << endl;
+
+        scheduleAt(simTime() + 60, resetStatTimer);
     }
 }
 
@@ -128,7 +136,12 @@ void ILNFS::handleMessage(cMessage *msg)
         }
         else
             dispatchPacket(ndnPacket);
-    }else
+    }
+    else if (msg == resetStatTimer){
+        neighborD = numDataFwd = neighborI = numIntFwd = 0;
+        scheduleAt(simTime() + 60, resetStatTimer);
+    }
+    else
         delete msg;
 }
 
@@ -164,22 +177,15 @@ void ILNFS::processLLInterest(Interest *interest, MACAddress macSrc)
     Data* cachedData = cs->lookup(interest);
     if ( cachedData != nullptr ){
         Data* data = cachedData->dup();
-        data->setCost((float)DELTA_MAX);
         data->setHopCount(0);
         data->setSeqNo(interest->getSeqNo());
-        /*if (delays){
-            if( waiting )
-                delete sendDelayedPacket->getDelayedPacket();
-            sendDelayedPacket->setDelayedPacket(data);
-            sendDelayedPacket->setType(DATA);
-            sendDelayedPacket->setFace(interest->getArrivalGate()->getIndex());
-            sendDelayedPacket->setMacDest(macSrc.str().c_str());
-            scheduleAt(simTime() + SimTime(computeDataRandomDelay(),SIMTIME_MS), sendDelayedPacket);
-            waiting = true;
-        }
-        else{*/
-            forwardDataToRemote(data, interest->getArrivalGate()->getIndex(), macSrc);
-        //}
+
+        data->setCost((float)DELTA_MAX);
+
+        data->setPriority(0);
+        data->setNa(computeTheta());
+
+        forwardDataToRemote(data, interest->getArrivalGate()->getIndex(), macSrc);
         delete interest;
         return;
     }
@@ -200,12 +206,14 @@ void ILNFS::processLLInterest(Interest *interest, MACAddress macSrc)
                     delete interest;
                     return;
                 }
+                deltaStat.record(delta);
                 delta+=computeTheta();          // delay adjustment
                 interest->setHopCount(interest->getHopCount() + 1);
                 interest->setCost(myCost); // cost for next hop process
-                interest->setPriority(1);  // discrete priority
-                eligStat.record(delta);
 
+                interest->setPriority(1);
+                interest->setNa(computeTheta());
+                interest->setKind(50);
                 if (delays){
                     if( waiting )
                         delete sendDelayedPacket->getDelayedPacket();
@@ -230,10 +238,12 @@ void ILNFS::processLLInterest(Interest *interest, MACAddress macSrc)
                 delete interest;
         }
         else{       // unknow prefix
-            if( interest->getCost() == 0. ){
+            if( (interest->getCost() == 0) && forwarding){
                 interest->setHopCount(interest->getHopCount() + 1);
-                interest->setPriority(2);
 
+                interest->setPriority(2);
+                interest->setNa(computeTheta());
+                interest->setKind(50);
                 if (delays){
                     if( waiting )
                         delete sendDelayedPacket->getDelayedPacket();
@@ -278,21 +288,12 @@ void ILNFS::processLLData(Data *data, MACAddress macSrc)
             cout << simTime() << "\t" << getFullPath() << ": Delay forward Data through NetDeviceFace" << endl;
             data->setHopCount(data->getHopCount()+1);
             data->setCost(newCost);
-            data->setPriority(0);
 
-            /*if (delays){
-                if( waiting )
-                    delete sendDelayedPacket->getDelayedPacket();
-                sendDelayedPacket->setDelayedPacket(data);
-                sendDelayedPacket->setType(DATA);
-                sendDelayedPacket->setFace(pe->getFace()->getIndex());
-                sendDelayedPacket->setMacDest(pe->getMacSrc().str().c_str());
-                scheduleAt(simTime() + SimTime(computeDataRandomDelay(),SIMTIME_MS), sendDelayedPacket);
-                waiting = true;
-            }
-            else{*/
-                forwardDataToRemote(data, pe->getFace()->getIndex(), pe->getMacSrc());
-            //}
+            data->setPriority(0);
+            data->setNa(computeTheta());
+
+            data->setKind(60);      // means fwded data
+            forwardDataToRemote(data, pe->getFace()->getIndex(), pe->getMacSrc());
             numDataFwd++;
             cs->add(data);
         }
@@ -334,8 +335,10 @@ void ILNFS::processHLInterest(Interest *interest)
         if ( fe != nullptr ){
             if ( fe->getFace()->isName("lowerLayerIn") ){
                 interest->setCost(fe->getCost());
+
                 interest->setPriority(1);
-                interest->setEligibility((float)DELTA_MAX); // highest continuous priority for CMSA
+                interest->setNa(0);
+
                 forwardInterestToRemote(interest, fe->getFace()->getIndex(), myMacAddress, fe->getMacDest());
             }
             else if ( fe->getFace()->isName("upperLayerIn") ){
@@ -344,7 +347,10 @@ void ILNFS::processHLInterest(Interest *interest)
         }
         else{
             interest->setCost(0);
+
             interest->setPriority(2);
+            interest->setNa(0);
+
             forwardInterestToRemote(interest, DEFAULT_MAC_IF, myMacAddress, MACAddress("ff:ff:ff:ff:ff:ff"));
         }
     }
@@ -362,8 +368,11 @@ void ILNFS::processHLData(Data *data)
     if ( pe != nullptr ){
         cout << simTime() << "\t" << getFullPath() << ": Solicited Data from AppFace " << data->getArrivalGate()->getIndex() << endl;
         if ( pe->getFace()->isName("lowerLayerIn") ){
+            data->setCost(0);
+
             data->setPriority(0);
-            data->setCost(0.);
+            data->setNa(0);
+
             forwardDataToRemote(data, pe->getFace()->getIndex(), pe->getMacSrc());      // send now, we use only one producer in this scenario
         }
         else if ( pe->getFace()->isName("upperLayerIn") ){
@@ -460,7 +469,7 @@ void ILNFS::finish()
     recordScalar("numDataFwd", numDataFwd);
     recordScalar("numDataCanceled", numDataCanceled);
     recordScalar("numDataUnsolicited", numDataUnsolicited);
-    //eligStat.recordAs("costDiffs");
+    recordScalar("numDropped", numDropped);
 }
 
 void ILNFS::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -469,17 +478,28 @@ void ILNFS::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     if (signalID == PitBase::interestTimeoutSignal) {
         IPit::Notification* notification = check_and_cast<IPit::Notification *>(obj);
         cGate* g = notification->face;
+
+        fib->resetCost(notification->interest->getName(), (float)DELTA_MAX);
+
         if (g->isName("upperLayerIn")){
             Interest* interest = notification->interest->dup();
             interest->setKind(TIMEOUT_CODE);
             cout << simTime() << "\t" << getFullPath() << ": Send timeout. Face: " << g->getIndex() << " | Interest: " << interest->getName() << endl;
             send(interest, "upperLayerOut", g->getIndex());
         }
-        fib->resetCost(notification->interest->getName(), (float)DELTA_MAX);
     }
     else if (signalID == FibIlnfs::entryExpiredSignal) {
         IFib::Notification* notification = check_and_cast<IFib::Notification *>(obj);
         cout << simTime() << "\t" << getFullPath() << ": Expired prefix (" << notification->prefix << ")" << endl;
+    }
+    else if (signalID == LayeredProtocolBase::packetFromUpperDroppedSignal){
+        cMessage* msg = check_and_cast<cMessage *>(obj);
+        if (msg->getKind() == 50){
+            pit->remove(msg->getName());
+            numIntFwd--;
+        }
+        else if (msg->getKind() == 60)
+            numDataFwd--;
     }
 }
 
@@ -489,7 +509,8 @@ bool ILNFS::handleOperationStage(LifecycleOperation *operation, int stage, IDone
     return true;
 }
 
-float ILNFS::computeTheta(){
+/*float ILNFS::computeTheta()
+{
     float Ns;
     int unsolicitedData = neighborD - numDataFwd;   // all received Data - fwd Data nbr
     int droppedI = neighborI - numIntFwd;           // all received Interest - fwd Interest nbr
@@ -498,9 +519,23 @@ float ILNFS::computeTheta(){
     }
     else{
         Ns = (float) unsolicitedData / (float) droppedI;
+        nsStat.record(Ns);
         if (Ns > 1) Ns = 1.;
     }
     return (float) ((float)TH - Ns);
+}*/
+
+float ILNFS::computeTheta()
+{
+    float Na;
+    int unsolicitedData = neighborD - numDataFwd;
+    int droppedI = neighborI - numIntFwd;
+    if (droppedI == 0)
+        Na = 0;
+    else
+        Na = (float) unsolicitedData / (float) droppedI;
+    nsStat.record(Na);
+    return Na;
 }
 
 float ILNFS::computeDelay(float delta)

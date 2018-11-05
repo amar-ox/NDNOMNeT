@@ -36,6 +36,9 @@
 #include "inet/networklayer/contract/ndn/ICs.h"
 #include "inet/networklayer/contract/ndn/IForwarding.h"
 
+#include "inet/common/LayeredProtocolBase.h"
+#include "inet/linklayer/base/MACProtocolBase.h"
+
 #include "PitBase.h"
 #include "FibBase.h"
 #include "FibIlnfs.h"
@@ -50,12 +53,10 @@
 #define REGISTER_PREFIX_CODE 15
 #define DEFAULT_MAC_IF 0
 
-#define M 5.0          // 9.0
-#define N 3.5        // 3.5
-#define DELTA_MAX 6.
+#define M 5.0
+#define N 3.5
+#define DELTA_MAX 8.
 #define TH 0.75
-#define A_MIN TH-1
-#define A_MAX DELTA_MAX+TH
 #define ALPHA 0.85
 
 namespace inet {
@@ -75,8 +76,10 @@ protected:
     PitBase *pit;
     FibIlnfs *fib;
     CsBase *cs;
+    MACProtocolBase *mac;
 
     /* router stat */
+    int numDropped = 0;
     int numIntReceived = 0;
     int numIntFwd = 0;
     int numIntCanceled = 0;
@@ -85,11 +88,15 @@ protected:
     int numDataReceived = 0;
     int numDataUnsolicited = 0;
     int numDataFwd = 0;
-    cOutVector eligStat;
+    cOutVector deltaStat;
+    cOutVector nsStat;
 
     /* delay adjustment */
     int neighborI = 0;
     int neighborD = 0;
+
+    /* reset Stats */
+    cMessage *resetStatTimer = new cMessage("resetStat");
 
     /* Omnet stuff */
     virtual void initialize(int stage) override;

@@ -29,9 +29,9 @@ packet NdnPacket
     int seqNo = 0; 				// for stats only
     short prefixLength = 1;		// for help :)
     bool flood = false;  
-    double cost = 0;
-    double eligibility = 10;
-    int priority = 1;
+    double cost;
+    double na;
+    int priority;
 };
 
 

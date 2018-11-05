@@ -81,16 +81,17 @@ void ConsumerAppBase::handleMessage(cMessage *msg)
 Interest* ConsumerAppBase::createNextInterest()
 {
     std::string interestName(cPrefix, strlen(cPrefix));
-    //interestName+="/";
-    //interestName+=std::to_string(intuniform(0,NUM_L1_COMPONENT)+1);
     interestName+="/";
-    interestName+=std::to_string((int)normal(5,2));
+    interestName+=std::to_string(intuniform(0,NUM_L1_COMPONENT));
+    size_t prefixLength = interestName.length();
+    interestName+="/";
+    interestName+=std::to_string(intuniform(1,NUM_L2_COMPONENT));
 
     Interest *interest = new Interest(interestName.c_str());
 
     // set simulation fields
     interest->setType(5);
-    interest->setPrefixLength(strlen(cPrefix));
+    interest->setPrefixLength(prefixLength);
     interest->setKind(0);
     interest->setHopCount(0);
     interest->setSeqNo(intSeqNo);

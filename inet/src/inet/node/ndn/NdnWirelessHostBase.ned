@@ -49,7 +49,7 @@ module NdnWirelessHostBase like INetworkNode
 
     submodules:
         status: NodeStatus if hasStatus {
-            @display("p=63,142");
+            @display("p=63,158");
         }
         energyStorage: <energyStorageType> like IEnergyStorage if energyStorageType != "" {
             parameters:
@@ -65,15 +65,15 @@ module NdnWirelessHostBase like INetworkNode
         }
         ndnL3: NdnL3 {
             parameters:
-                @display("p=216,159;q=queue");
+                @display("p=216,189;q=queue");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=63,53;is=s");
+                @display("p=63,90;is=s");
         }
         wlan[numRadios]: <default("WirelessNic")> like IWirelessNic {
             parameters:
-                @display("p=216,277,row,60;q=queue");
+                @display("p=216,303,row,60;q=queue");
         }
 
     connections allowunconnected:

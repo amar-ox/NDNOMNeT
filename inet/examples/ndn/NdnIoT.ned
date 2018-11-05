@@ -28,7 +28,7 @@ network NdnIoT
         int numRouters;
         int numProducers;
         int numConsumers;
-        @display("bgb=180,180;bgg=100,1,grey95");
+        @display("bgb=300,300;bgg=100,1,grey95");
     submodules:
         radioMedium: IdealRadioMedium {
             @display("p=649,75");

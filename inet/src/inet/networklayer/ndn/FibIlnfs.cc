@@ -229,8 +229,8 @@ bool FibIlnfs::resetCost(const char* name, float max_delta)
     unsigned index = 0;
     if ( match(name, &index) ){
         cout << getFullPath() << ": Reset cost for: "<< entries.at(index)->getPrefix() << endl;
-        entries.at(index)->resetCost(max_delta);
-        return true;
+        return !entries.at(index)->resetCost(max_delta);
+        //return true;
     }
     return false;
 }
