@@ -21,6 +21,8 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
+#include <fstream>
 #include <math.h>
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -33,8 +35,6 @@
 
 #define HISTORY_SIZE 100
 #define TIMEOUT_CODE 100
-#define NUM_L1_COMPONENT 1 // num content sources
-#define NUM_L2_COMPONENT 5 // num data type per source
 
 using namespace omnetpp;
 namespace inet {
@@ -74,6 +74,17 @@ protected:
     int numUnsatisfied = 0;
     int intSeqNo = 0;
 
+    std::string statFile = "/home/amar/pandas/data/BF-ML/statCons";
+
+    /* Zipf */
+    double c = 0;                  // Normalization constant
+    double alpha;
+    unsigned int nContent;         // Total nbr of content
+    unsigned int nClasses;         // Number of classes
+    unsigned int m;                // Content nbr per class
+    std::vector<double> probVec;   // Cumulative probabilities
+    virtual unsigned int pickClass();
+
     /* Omnet stuff */
     virtual bool isNodeUp();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -105,6 +116,9 @@ protected:
 
     /* */
     virtual void onData(Data *data);
+
+    /* */
+    virtual void writeLog(int seqN, const char* name, double data1, int data2);
 
 public:
     ConsumerAppBase();

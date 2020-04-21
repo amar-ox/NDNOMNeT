@@ -41,6 +41,10 @@ void ProducerAppBase::initialize(int stage)
         dataLength = par("dataLength");
         dataFreshness = par("dataFreshness");
 
+        /* for binary tree */
+        nProducers = par("nProducers");
+        n = par("n");
+
         WATCH(numIntReceived);
         WATCH(numDataSent);
     }
@@ -73,8 +77,18 @@ void ProducerAppBase::processInterest(NdnPacket *packet)
        Interest* interest = check_and_cast<Interest *>(packet);
        numIntReceived++;
 
-       cout << getFullPath() << ":" << endl;
-       Tools::printPacket(interest);
+       /* for binary tree */
+       cStringTokenizer tokenizer(interest->getName(), "/");
+       const char *content;
+       while (tokenizer.hasMoreTokens()) {
+           content = tokenizer.nextToken();
+       }
+       if ( (n != -1) && ((atoi(content) % nProducers) != n) ){
+           //cout << getFullPath() << ": Request for content <" << content << "> Not me." << endl;
+           delete packet;
+           return;
+       }
+       /*-----------------*/
 
        if ( (simTime() >= startTime) && (stopTime < SIMTIME_ZERO || simTime() < stopTime) ){
            Data *data = new Data(interest->getName());
@@ -85,7 +99,7 @@ void ProducerAppBase::processInterest(NdnPacket *packet)
            data->setFreshnessPeriod(dataFreshness);
            int dLength = dataLength ? dataLength : Tools::computeTlvPacketSize(data);
            data->setByteLength(dLength);
-           sendDelayed(data, SimTime(1.5, SIMTIME_MS), "producerOut");
+           send(data, "producerOut");
            cout << simTime() << "\t" << getFullPath() << ": >> Data (" << data->getName() << ")" << endl;
            numDataSent++;
        }else

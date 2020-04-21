@@ -27,10 +27,19 @@ simple BF like IForwarding
         string pitModule = default("^.pit");
         string fibModule = default("^.fib");
         string csModule = default("^.cs"); 
-        string xuModule = default("^.xu"); 
-        int ndnMacMapping = default(11);
+        string xuModule = default("^.xu");       
         bool forwarding;
+        bool delays = default(true);
         bool cacheUnsolicited = default(false);
+        
+        // for Blind Flooding
+        int dw = default(255);
+		double deferSlotTime = default(1.0);
+		
+        // for binary tree
+        int fatherId = default(0);
+        int treeDepth = default(0);
+        int myLevel = default(0);
         @display("i=block/switch");
     gates:
         input upperLayerIn[];

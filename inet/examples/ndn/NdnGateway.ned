@@ -17,23 +17,82 @@ package inet.examples.ndn;
 
 import inet.physicallayer.idealradio.IdealRadioMedium;
 import inet.node.ndn.NdnWirelessHost;
+import inet.node.ndn.NdnWirelessHostBase;
 
-network NdnGateway
+network NdnBinaryTree
 {
     parameters:
-        int numHosts;        
+        int label; 
         @display("bgb=200,200;bgg=100,1,grey95");
     submodules:
         radioMedium: IdealRadioMedium {
-            @display("p=649,75");
+            @display("p=200,200");
         }
-        
-        ndnLM: NdnWirelessHost {            
-            @display("i=device/router;p=100,100");
+        /////////////////////////////////
+        ndnGW: NdnWirelessHost {
+            @display("i=device/router;p=100,0");
         }
-       
-        ndnNED[numHosts]: NdnWirelessHost {            
-            @display("p=100,100");
+        /////////////////////////////////
+        n11: NdnWirelessHostBase {
+            @display("p=85,30");
         }
+        n12: NdnWirelessHostBase {
+            @display("p=115,30");
+        }
+        /////////////////////////////////
+        n112: NdnWirelessHostBase {
+            @display("p=80,60");
+        }
+        n111: NdnWirelessHostBase {
+            @display("p=55.08,45.56");
+        }
+
+        n121: NdnWirelessHostBase {
+            @display("p=120,60");
+        }
+        n122: NdnWirelessHostBase {
+            @display("p=144.16,45.56");
+        }
+        /////////////////////////////////
+        p1111: NdnWirelessHost {
+            @display("p=34.68,68");
+        }
+        p1112: NdnWirelessHost {
+            @display("p=27.880001,45.56");
+        }
+        p1121: NdnWirelessHost {
+            @display("p=89,89");
+        }
+        p1122: NdnWirelessHost {
+            @display("p=69.36,89.76");
+        }
+
+        p1211: NdnWirelessHost {
+            @display("p=114,89");
+        }
+        p1212: NdnWirelessHost {
+            @display("p=135,90");
+        }
+
+        p1221: NdnWirelessHost {
+            @display("p=167.28,61.2");
+        }
+        p1222: NdnWirelessHost {
+            @display("p=176.8,45.56");
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 

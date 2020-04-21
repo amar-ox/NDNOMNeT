@@ -54,6 +54,10 @@ protected:
     int numIntReceived = 0;
     int numDataSent = 0;
 
+    /* for binary tree */
+    int nProducers = 0;
+    int n = 0;
+
     /* Omnet stuff */
     virtual bool isNodeUp();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

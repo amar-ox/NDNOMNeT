@@ -25,27 +25,28 @@ import inet.node.ndn.NdnWirelessHostBase;
 network NdnIoT
 {
     parameters:
+        int label;
         int numRouters;
         int numProducers;
         int numConsumers;
-        @display("bgb=300,300;bgg=100,1,grey95");
+        @display("bgb=180,180;bgg=100,1,grey95");
     submodules:
         radioMedium: IdealRadioMedium {
             @display("p=649,75");
         }
         ndnP[numProducers] : NdnWirelessHost {
             parameters:
-                @display("p=90,90");
+                @display("p=80,80");
         }
                 
-        ndnR[numRouters]: NdnWirelessHostBase {
+        ndnR[numRouters]: NdnWirelessHost {
             parameters:
-                @display("p=0,0");
+                @display("p=80,80");
         }
               
         ndnC[numConsumers] : NdnWirelessHost {
             parameters:
-                @display("p=90,90");
+                @display("p=80,80");
         } 
 }
 

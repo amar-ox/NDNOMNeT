@@ -64,6 +64,7 @@ PingApp::PingApp()
 PingApp::~PingApp()
 {
     cancelAndDelete(timer);
+    cancelAndDelete(timeout);
 }
 
 void PingApp::initialize(int stage)
@@ -105,8 +106,6 @@ void PingApp::initialize(int stage)
         // references
         timer = new cMessage("sendPing", PING_FIRST_ADDR);
         timeout = new cMessage("pingTimeout");
-
-
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // startup
@@ -146,7 +145,7 @@ void PingApp::handleMessage(cMessage *msg)
         }
     }
     /**********************************************************************************************************/
-    if (msg->isSelfMessage()) {
+    /*if (msg->isSelfMessage()) {
             if (msg->getKind() == PING_FIRST_ADDR) {
                 srcAddr = L3AddressResolver().resolve(par("srcAddr"));
                 parseDestAddressesPar();
@@ -171,7 +170,7 @@ void PingApp::handleMessage(cMessage *msg)
             // send a ping
             sendPing();
 
-            if (count > 0 /*&& sendSeqNo % count == 0*/) {
+            if (count > 0 && sendSeqNo % count == 0) {
                 // choose next dest address
                 destAddrIdx++;
                 msg->setKind(PING_CHANGE_ADDR);
@@ -187,9 +186,9 @@ void PingApp::handleMessage(cMessage *msg)
         }else {
             // process ping response
             processPingResponse(check_and_cast<PingPayload *>(msg));
-        }
+        }*/
     /**********************************************************************************************************/
-    /*if (msg == timer) {
+    if (msg == timer) {
         if (msg->getKind() == PING_FIRST_ADDR) {
             srcAddr = L3AddressResolver().resolve(par("srcAddr"));
             parseDestAddressesPar();
@@ -202,12 +201,12 @@ void PingApp::handleMessage(cMessage *msg)
             msg->setKind(PING_SEND);
         }
         sendPing();
-        if (sentCount < count)
+        if ( (sentCount < count) || (count == -1) )
             scheduleNextPingRequest(simTime(), false);
     }
     else {
         processPingResponse(check_and_cast<PingPayload *>(msg));
-    }*/
+    }
 }
 
 void PingApp::refreshDisplay() const
@@ -435,7 +434,7 @@ void PingApp::sendPing()
     ASSERT(pid != -1);
     msg->setOriginatorId(pid);
     msg->setSeqNo(sendSeqNo);
-    msg->setByteLength(packetSize + 4);
+    msg->setByteLength(packetSize);
 
     // store the sending time in a circular buffer so we can compute RTT when the packet returns
     sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = simTime();

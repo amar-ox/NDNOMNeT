@@ -22,6 +22,8 @@
 #include <vector>
 #include <string>
 #include <math.h>
+#include <iostream>
+#include <fstream>
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
@@ -38,13 +40,12 @@
 
 #include "inet/networklayer/ndn/PitBase.h"
 #include "inet/networklayer/ndn/FibBase.h"
+#include "inet/networklayer/ndn/FibIlnfs.h"
 #include "inet/networklayer/ndn/CsBase.h"
 #include "inet/networklayer/ndn/packets/NdnPackets_m.h"
 #include "inet/networklayer/ndn/packets/Tools.h"
 
-#define DW 255
-#define DEFER_SLOT_TIME 0.032
-#define HISTORY_SIZE 10
+
 #define TIMEOUT_CODE 100
 #define REGISTER_PREFIX_CODE 15
 #define DEFAULT_MAC_IF 0
@@ -57,9 +58,19 @@ protected:
     bool waiting = false;
     MACAddress myMacAddress;
     IInterfaceTable *ift = nullptr;
-    int ndnMacMapping;
     bool forwarding;
     bool cacheUnsolicited;
+    bool delays;
+
+    /* for Blind Flooding */
+    int dw;
+    double deferSlotTime;
+
+    /* for binary tree */
+    int treeDepth;
+    int fatherId;
+    int myLevel;
+    std::string statFile = "/home/amar/pandas/data/model/statFwd-";
 
     /* NDN tables */
     PitBase *pit;
@@ -75,6 +86,15 @@ protected:
     int numDataReceived = 0;
     int numDataUnsolicited = 0;
     int numDataFwd = 0;
+
+    /* stats for ML */
+    cHistogram fsrHist;
+    cOutVector fsrVect;
+
+    /* Na */
+    int neighborI = 0;
+    int neighborD = 0;
+    //cOutVector naStat;
 
     /* Omnet stuff */
     virtual void initialize(int stage) override;
@@ -121,7 +141,13 @@ protected:
     virtual double computeDataRandomDelay();
 
     /* */
+    virtual float computeNa();
+
+    /* */
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    /* */
+    virtual void writeLog(int seqN, const char* name, short type);
 
     /**
      * ILifecycle method

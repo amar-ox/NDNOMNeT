@@ -77,7 +77,7 @@ bool FibIlnfs::registerPrefix(const char* prefix, cGate* face, MACAddress dest)
     if ( !match(prefix, &index) && (entries.size() < maxSize) ){
         std::string stringPrefix(prefix, strlen(prefix));
         cout << simTime() << "\t" << getFullPath() << ": Insert prefix: " << stringPrefix << " | " << "Face: " << face << " (local)" << endl;
-        IlnfsEntry *e = new IlnfsEntry(stringPrefix, face, dest, 100000, 0, 1);
+        IlnfsEntry *e = new IlnfsEntry(stringPrefix, face, dest, 1000000);
         entries.push_back(e);
         numAdded++;
         return true;
@@ -234,6 +234,55 @@ bool FibIlnfs::resetCost(const char* name, float max_delta)
     }
     return false;
 }
+
+/* NDN-ML */
+void FibIlnfs::incNumIntFwd(const char* name, short length){
+    Enter_Method("incNumIntFwd(...)");
+    unsigned index = -1;
+    if ( match(name, &index) ){
+        cout << simTime() << "\t" << getFullPath() << ": incNumIntFwd: " << name << endl;
+        entries.at(index)->incNumIntFwd();
+        entries.at(index)->markNotErased();
+        entries.at(index)->setExpireAt(simTime() + SimTime(entryLifetime, SIMTIME_MS));
+        return;
+    }
+
+    if ( entries.size() < maxSize ){
+        cout << simTime() << "\t" << getFullPath() << ": Create entry for: " << name << endl;
+        std::string prefix(name, length);
+        IlnfsEntry *e = new IlnfsEntry(prefix, 0, MACAddress(), entryLifetime);
+        e->incNumIntFwd();
+        entries.push_back(e);
+        numAdded++;
+    }else{
+        throw cRuntimeError("FIB full");
+    }
+}
+
+void FibIlnfs::incNumDataFwd(const char* name){
+    Enter_Method("incNumDataFwd(...)");
+    unsigned index = -1;
+    if ( match(name, &index) ){
+        cout << simTime() << "\t" << getFullPath() << ": incNumDataFwd: " << name << endl;
+        entries.at(index)->incNumDataFwd();
+        entries.at(index)->markNotErased();
+        entries.at(index)->setExpireAt(simTime() + SimTime(entryLifetime, SIMTIME_MS));
+    }else{
+        throw cRuntimeError("Interest never forwarded for this Data.");
+    }
+}
+
+float FibIlnfs::getFSR(const char* name){
+    Enter_Method("getFSR(...)");
+    unsigned index = 0;
+    if ( match(name, &index) ){
+        cout << getFullPath() << ": getFSR for: "<< name << endl;
+        return entries.at(index)->getFSR();
+    }
+    //throw cRuntimeError("No FIB entry for this name");
+    return 0;
+}
+/**********/
 
 
 } //namespace

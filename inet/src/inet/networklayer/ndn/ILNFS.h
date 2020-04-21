@@ -55,7 +55,7 @@
 
 #define M 5.0
 #define N 3.5
-#define DELTA_MAX 8.
+#define DELTA_MAX 9.
 #define TH 0.75
 #define ALPHA 0.85
 

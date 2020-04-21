@@ -28,7 +28,12 @@ simple ConsumerAppBase
         int sendInterval @unit("s") = default(1s);
         int numInterests = default(-1);
         int interestReTx = default(1);
-        int interestLifetime @unit("ms") = default(4000ms)
+        int interestLifetime @unit("ms") = default(4000ms);
+        
+        // Zipf
+        double alpha = default(2);
+        int nContent;
+        int nClasses;
               
         @display("i=block/sink");
     gates:

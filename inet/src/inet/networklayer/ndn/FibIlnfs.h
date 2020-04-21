@@ -33,11 +33,14 @@ namespace inet {
 class INET_API IlnfsEntry : public BaseEntry
 {
 public:
-    IlnfsEntry(std::string prefix, cGate* face, MACAddress dest, int entryLifetime, float mhc, float a)
+    IlnfsEntry(std::string prefix, cGate* face, MACAddress dest, int entryLifetime, float mhc = 0, float a = 1)
     : BaseEntry(prefix, face, dest, entryLifetime), minHeardCost(mhc)
     {
         cost = 0.;
         cost = (float)(1. - (float)a) * (float)cost + (float)a * (float)(1. + (float)mhc);
+
+        numIntFwd = 0;
+        numDataFwd = 0;
     }
 
     float getCost() { return cost; }
@@ -64,10 +67,37 @@ public:
         numTimeout = 0;
     }
 
+    /********** NDN-ML ***********/
+
+    void incNumIntFwd(){
+        numIntFwd+=1;
+    }
+
+    void incNumDataFwd(){
+        numDataFwd+=1;
+    }
+
+    // Forwarder Satisfaction Rate
+    float getFSR(){
+        if ( numIntFwd == 0 ){
+            if (numDataFwd == 0)
+                return 0.;
+            else
+                throw cRuntimeError("There are fwd Data without fwd Ints.");
+        }
+        return (float)((float)numDataFwd / (float)numIntFwd);
+    }
+    //////////////////////////////
+
 private:
     float minHeardCost;
     float cost;
     int numTimeout = 0;
+
+    /* NDN-ML */
+    int numIntFwd;
+    int numDataFwd;
+    /////////
 };
 
 
@@ -105,6 +135,13 @@ public:
 
     /* */
     virtual bool resetCost(const char* name, float max_delta);
+
+
+    /* NDN-ML */
+    virtual void incNumIntFwd(const char* name, short length);
+    virtual void incNumDataFwd(const char* name);
+    virtual float getFSR(const char* name);
+    /**********/
 
 public:
     /* */

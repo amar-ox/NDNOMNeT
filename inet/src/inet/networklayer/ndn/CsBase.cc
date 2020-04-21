@@ -27,30 +27,40 @@ Define_Module(CsBase);
 
 CsBase::CsBase()
 {
+    size = 0;
+    pageList = new DoublyLinkedList();
+    pageMap = map<string, Node*>();
 }
 
 CsBase::~CsBase()
 {
     cancelAndDelete(checkDataStale);
-    for (unsigned int i(0); i < entries.size(); ++i){
+    /*for (unsigned int i(0); i < entries.size(); ++i){
         delete entries[i]->getData();
         entries.erase(entries.begin() + (i--));
+    }*/
+    map<std::string, Node*>::iterator i1;
+    for(i1 = pageMap.begin(); i1 != pageMap.end(); i1++) {
+        delete i1->second->value;
+        delete i1->second;
     }
+    delete pageList;
 }
 
 void CsBase::initialize()
 {
     maxSize = par("maxSize");
-    entries.clear();
+    //entries.clear();
+    //this->capacity = capacity;
 }
 
 void CsBase::handleMessage(cMessage *msg)
 {
-    if ( msg->isSelfMessage() ){
+    /*if ( msg->isSelfMessage() ){
         cleanStaled();
         if (entries.size())
             scheduleAt(simTime() + SimTime(1000, SIMTIME_MS), checkDataStale);
-    }else
+    }else*/
         delete msg;
 }
 
@@ -58,7 +68,7 @@ Data* CsBase::lookup(Interest* interest)
 {
     /* FIXME: looks for exact name matching (no suffixes...) */
     Enter_Method("lookup(...)");
-    if (entries.empty())
+    /*if (entries.empty())
             return nullptr;
     std::vector<CsEntry *>::iterator it;
     for (it = entries.begin(); it != entries.end(); ++it){
@@ -79,14 +89,59 @@ Data* CsBase::lookup(Interest* interest)
         }
     }
     numMiss++;
-    return nullptr;
+    return nullptr;*/
+
+    //std::string key(interest->getName(),strlen(interest->getName()));
+    std::string key = interest->getName();
+
+    if(pageMap.find(key) == pageMap.end()) {
+        cout << simTime() << "\t" << getFullPath() << ": Cache Miss" << endl;
+        numMiss++;
+        return nullptr;
+    }
+    numHit++;
+    Data* val = pageMap[key]->value;
+    cout << simTime() << "\t" << getFullPath() << ": Cache Hit (" << val->getName() << ")" << endl;
+    // move the page to front
+    pageList->move_page_to_head(pageMap[key]);
+    return val;
 }
 
-/* very simple caching algorithm */
+/* LRU caching */
 bool CsBase::add(Data* data)
 {
     Enter_Method("add(...)");
-    if (!maxSize)
+    if (maxSize <= 0)
+        return false;
+    std::string key(data->getName(),strlen(data->getName()));
+    //std::string key = data->getName();
+    if(pageMap.find(key) != pageMap.end()) {
+        // if key already present, update value and move page to head
+        cout << simTime() << "\t" << getFullPath() << ": Update Data (" << key << ")" << endl;
+        pageMap[key]->value = data->dup();
+        pageList->move_page_to_head(pageMap[key]);
+        return true;
+    }
+
+    if(size == (int)maxSize) {
+        // remove rear page
+        cout << simTime() << "\t" << getFullPath() << ": Remove LRU Data (" << key << ")" << endl;
+        delete pageList->get_rear_page()->value;
+        std::string k = pageList->get_rear_page()->key;
+        pageMap.erase(k);
+        pageList->remove_rear_page();
+        size--;
+    }
+
+    // add new page to head to Queue
+    Node *page = pageList->add_page_to_head(key, data->dup());
+    cout << simTime() << "\t" << getFullPath() << ": Add Data (" << key << ")" << endl;
+    size++;
+    pageMap[key] = page;
+    numAdded++;
+    return true;
+
+    /*if (!maxSize)
         return false;
     std::vector<CsEntry *>::iterator it;
     for (it = entries.begin(); it != entries.end(); ++it){
@@ -131,7 +186,7 @@ bool CsBase::add(Data* data)
     if (! checkDataStale->isScheduled())
         scheduleAt(simTime() + SimTime(1000, SIMTIME_MS), checkDataStale);
     numAdded++;
-    return true;
+    return true;*/
 }
 
 bool CsBase::remove(const char* name)
@@ -141,7 +196,7 @@ bool CsBase::remove(const char* name)
 
 void CsBase::cleanStaled()
 {
-    std::vector<CsEntry *>::iterator it;
+    /*std::vector<CsEntry *>::iterator it;
     for (it = entries.begin(); it != entries.end(); ++it){
         if ( ((*it)->getStaleAt() > SIMTIME_ZERO) && (*it)->getStaleAt() <= simTime() ){
             numStale++;
@@ -150,7 +205,7 @@ void CsBase::cleanStaled()
             //emit(dataStaleSignal, &signal);
             (*it)->setFresh(false);
         }
-    }
+    }*/
 }
 
 void CsBase::print()
@@ -160,7 +215,7 @@ void CsBase::print()
 void CsBase::refreshDisplay() const
 {
     char buf[40];
-    sprintf(buf, "Size: %d entries", (int)entries.size());
+    sprintf(buf, "Size: %d entries", (int)size);
     getDisplayString().setTagArg("t", 0, buf);
 }
 

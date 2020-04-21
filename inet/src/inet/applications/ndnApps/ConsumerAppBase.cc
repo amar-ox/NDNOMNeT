@@ -47,8 +47,34 @@ void ConsumerAppBase::initialize(int stage)
         sendIntervalPar = &par("sendInterval");
 
         lastRttVector.setName("RTT");
-        WATCH(numIntSent);
-        WATCH(numDataReceived);
+
+        /* Zipf */
+        alpha = par("alpha");
+        nContent = (unsigned) par("nContent");
+        nClasses = (unsigned) par("nClasses");
+        m = (unsigned) (nContent/nClasses);
+
+        unsigned int k;
+        for (k=1; k <= nClasses; k++)
+            c = c + (1.0 / pow((double) k, alpha));
+        c = 1.0 / c;
+
+        double val = 0;
+        for (k=1; k <= nClasses; k++){
+            val+= (c / pow((double) k, alpha));
+            probVec.push_back(val);
+        }
+        /*------*/
+
+        /* for trace file */
+        //long label = this->getSimulation()->getSystemModule()->par("label").longValue();
+        //statFile+=std::to_string(label);
+        statFile+=".csv";
+        std::ofstream  out;
+        out.open(statFile.c_str(), std::ios_base::trunc);
+        //out << "time,seq,class,rtt,hops" << endl;
+        out << "pktSeq,pkName,rtt,hops" << endl;
+        out.close();
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
@@ -63,8 +89,9 @@ void ConsumerAppBase::handleMessage(cMessage *msg)
     if (!isNodeUp())
         throw cRuntimeError("Application is not running");
     if (msg == expressInterestTimer){
+        //cout << simTime() << "\t" << getFullPath() << ": Express Interest..." << endl;
         expressInterest(createNextInterest());
-        if (numIntSent < numInterests)
+        if (numIntSent < numInterests || numInterests == -1)
             scheduleNextInterest(simTime());
     }
     else if (msg->isPacket()){
@@ -81,11 +108,18 @@ void ConsumerAppBase::handleMessage(cMessage *msg)
 Interest* ConsumerAppBase::createNextInterest()
 {
     std::string interestName(cPrefix, strlen(cPrefix));
+    size_t prefixLength = strlen(cPrefix);
+
     interestName+="/";
-    interestName+=std::to_string(intuniform(0,NUM_L1_COMPONENT));
-    size_t prefixLength = interestName.length();
+    interestName+=std::to_string(pickClass());
     interestName+="/";
-    interestName+=std::to_string(intuniform(1,NUM_L2_COMPONENT));
+    interestName+=std::to_string(intuniform(1,m));
+    //size_t prefixLength = interestName.length();
+
+    /* NDN-ML */
+    // interestName+="/";
+    // interestName+=std::to_string(intSeqNo);
+    /**********/
 
     Interest *interest = new Interest(interestName.c_str());
 
@@ -99,7 +133,7 @@ Interest* ConsumerAppBase::createNextInterest()
 
     // set NDN fields
     interest->setCanBePrefix(false);
-    interest->setMustBeFresh(true);
+    interest->setMustBeFresh(false);
     interest->setInterestLifetimeMs(interestLifetime);
     interest->setNonceArraySize(4);
     interest->setNonce(0,intuniform(0,255));
@@ -127,13 +161,20 @@ void ConsumerAppBase::onData(Data *data)
             0 : simTime() - lastSendTimeHistory[data->getSeqNo() % HISTORY_SIZE];
     short numRetx  = intSeqNo - data->getSeqNo() > HISTORY_SIZE ? 0 : numRetxHistory[data->getSeqNo() % HISTORY_SIZE];
 
-    if ((lastRtt > 0) && (lastRtt <= 2)){
+    /* for model */
+    //if ( (lastRtt.dbl() >= 0.) && (lastRtt.dbl()*1000. < interestLifetime) ){
+
+    /* for nd-csma */
+    if ( (lastRtt.dbl() > 0.) && (lastRtt.dbl()*1000. < interestLifetime) ){
         allRttStat.collect(allRtt * 1000);
         lastRttStat.collect(lastRtt * 1000);
         lastRttVector.record(lastRtt * 1000);
         retxStat.collect(numRetx);
         hopCountStat.collect(data->getHopCount());
     }
+    if ( lastRtt.dbl()*1000 < interestLifetime )
+        writeLog(data->getSeqNo(), data->getName(), lastRtt.dbl()*1000, data->getHopCount());
+
     numDataReceived++;
     delete data;
 }
@@ -159,6 +200,21 @@ void ConsumerAppBase::scheduleNextInterest(simtime_t previous)
         scheduleAt(next, expressInterestTimer);
 }
 
+unsigned int ConsumerAppBase::pickClass()
+{
+    double r;
+    do
+        r = uniform(0,1);
+    while ((r == 0) || (r == 1));
+
+    for (unsigned int k=1; k <= nClasses; k++)
+        if (r < probVec[k])
+          return k;
+
+    throw cRuntimeError("Error in Zipf distribution.");
+    return 0;
+}
+
 void ConsumerAppBase::expressInterest(Interest* interest)
 {
     send(interest, "consumerOut");
@@ -180,6 +236,7 @@ void ConsumerAppBase::onTimeout(Interest *interest)
         cout << simTime() << "\t" << getFullPath() << ": >> ReTx Interest (" << interest->getName() << ")" << endl;
     }
     else{
+        writeLog(interest->getSeqNo(), interest->getName(), -1., -1);
         numUnsatisfied++;
         delete interest;
     }
@@ -232,4 +289,24 @@ void ConsumerAppBase::finish()
     hopCountStat.recordAs("hopCount");
 }
 
+void ConsumerAppBase::writeLog(int seqN, const char* name, double data1, int data2)
+{
+    /* header: pktSeq,pkName,rtt,hops */
+
+    /*cStringTokenizer tokenizer(name, "/");
+    const char *content, *clss;
+    while (tokenizer.hasMoreTokens()){
+        clss = tokenizer.nextToken();
+        content = tokenizer.nextToken();
+    }
+    std::ofstream  out;
+    out.open(statFile, std::ios_base::app);
+    out << simTime().inUnit(SIMTIME_S)  << "," << seqN << "," << clss << "," << data1 << "," << data2 << endl;
+    out.close();*/
+
+    std::ofstream  out;
+    out.open(statFile, std::ios_base::app);
+    out << seqN  << "," << name << "," << data1 << "," << data2 << endl;
+    out.close();
+}
 } //namespace

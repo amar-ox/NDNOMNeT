@@ -16,35 +16,39 @@
 package inet.examples.ndn;
 
 import inet.physicallayer.idealradio.IdealRadioMedium;
-import inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandScalarRadioMedium;
 import inet.node.ndn.NdnWirelessHost;
 import inet.node.ndn.NdnWirelessHostBase;
 
-
-network NdnDemo
+network NdnPing
 {
     parameters:
-        int numRouters;
-        int numProducers;
-        int numConsumers;
-        @display("bgb=100,100;bgg=100,1,grey95");
+        int label; 
+        @display("bgb=200,200;bgg=100,1,grey95");
     submodules:
         radioMedium: IdealRadioMedium {
-            @display("p=649,75");
+            @display("p=200,200");
         }
-        ndnProd[numProducers]: NdnWirelessHost {
-            parameters:
-                @display("p=49.92,82.159996");
+        /////////////////////////////////
+        ndnC: NdnWirelessHost {
+            @display("p=50,50");
+        }
+        
+        ndnP: NdnWirelessHost {
+            @display("p=50,80");
         }
 
-        ndnRt[numRouters]: NdnWirelessHostBase {
-            parameters:
-                @display("p=0,0");
-        }
 
-        ndnCons[numConsumers]: NdnWirelessHost {
-            parameters:
-                @display("p=49.92,17.333334");
-        }
+
+
+
+
+
+
+
+
+
+
+
+
 }
 

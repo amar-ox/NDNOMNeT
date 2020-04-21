@@ -26,6 +26,10 @@ simple ProducerAppBase
         int dataFreshness @unit("ms") = default(0);
         double startTime @unit("s") = default(0s);
         double stopTime @unit("s") = default(-1s);
+        
+        // for binary tree
+        int nProducers;
+        int n = default(-1);
                                    
         @display("i=block/source");
     gates:

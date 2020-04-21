@@ -68,7 +68,7 @@ bool PitBase::create(Interest *interest, MACAddress src)
     entries.push_back(new PitEntry(interstCopy, interest->getArrivalGate(), src));
     numAdded++;
     if (! checkTimeout->isScheduled())
-        scheduleAt(simTime() + SimTime(1000, SIMTIME_MS), checkTimeout);
+        scheduleAt(simTime() + SimTime(10, SIMTIME_MS), checkTimeout);
     return true;
 }
 
@@ -145,7 +145,7 @@ void PitBase::finish()
     cout << "---------------------------------------------------------------------------------------------------------------" << endl;
     cout << getFullPath() << ": " << numAdded << " added, " << numRemoved << " removed, " << numMatched << " matched, " << numMissed << " missed, " << numTimeout << " timeout" << endl;
     cout << "---------------------------------------------------------------------------------------------------------------" << endl;
-    sizeStat.recordAs("size");
+    //sizeStat.recordAs("size");
 }
 
 void PitBase::print()

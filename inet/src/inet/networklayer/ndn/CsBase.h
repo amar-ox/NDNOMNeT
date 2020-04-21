@@ -19,14 +19,88 @@
 #ifndef __INET_CS_BASE_H_
 #define __INET_CS_BASE_H_
 
-#include <vector>
+#include <map>
 #include <string>
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ndn/ICs.h"
 #include "packets/NdnPackets_m.h"
 #include "packets/Tools.h"
 
+using namespace std;
 using namespace omnetpp;
+
+class Node {
+  public:
+  std::string key;
+  Data *value;
+  Node *prev, *next;
+  Node(std::string k, Data *v): key(k), value(v), prev(nullptr), next(nullptr) {}
+  Data* getValue(){return value;}
+};
+
+class DoublyLinkedList {
+  Node *front, *rear;
+
+  bool isEmpty() {
+      return rear == nullptr;
+  }
+
+  public:
+  DoublyLinkedList(): front(nullptr), rear(nullptr) {}
+
+  Node* add_page_to_head(std::string key, Data* value) {
+      Node *page = new Node(key, value);
+      if(!front && !rear) {
+          front = rear = page;
+      }
+      else {
+          page->next = front;
+          front->prev = page;
+          front = page;
+      }
+      return page;
+  }
+
+  void move_page_to_head(Node *page) {
+      if(page==front) {
+          return;
+      }
+      if(page == rear) {
+          rear = rear->prev;
+          rear->next = nullptr;
+      }
+      else {
+          page->prev->next = page->next;
+          page->next->prev = page->prev;
+      }
+
+      page->next = front;
+      page->prev = nullptr;
+      front->prev = page;
+      front = page;
+  }
+
+  void remove_rear_page() {
+      if(isEmpty()) {
+          return;
+      }
+      if(front == rear) {
+          delete rear;
+          front = rear = nullptr;
+      }
+      else {
+          Node *temp = rear;
+          rear = rear->prev;
+          rear->next = nullptr;
+          delete temp;
+      }
+  }
+  Node* get_rear_page() {
+      return rear;
+  }
+};
+
+
 namespace inet {
 
 class INET_API CsBase : public cSimpleModule, public ICs
@@ -59,7 +133,11 @@ public:
     static simsignal_t dataStaleSignal;
 
 private:
-    std::vector<CsEntry *> entries;
+    //std::vector<CsEntry *> entries;
+    int size;
+    DoublyLinkedList *pageList;
+    map<std::string, Node*> pageMap;
+
     cMessage *checkDataStale = new cMessage("ds");
     unsigned maxSize;
 

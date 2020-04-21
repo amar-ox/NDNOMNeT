@@ -48,6 +48,7 @@ public:
         Data* getData() { return data; }
         bool getFresh() { return fresh; }
         void setFresh(bool f) { fresh = f; }
+        void setData(Data* d) {data = d;}
 
     private:
         Data* data;
